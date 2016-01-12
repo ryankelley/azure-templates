@@ -4,12 +4,6 @@
   "parameters": {
     "fwCount": {
       "value": 1
-    },
-    "webCount": {
-      "value": 2
-    },
-    "sqlCount": {
-      "value": 2
     }
   }
 }
