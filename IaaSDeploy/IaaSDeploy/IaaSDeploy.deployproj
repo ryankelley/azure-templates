@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>0982d026-7ce2-424f-b265-fb7093542de3</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>1.0</TargetFrameworkVersion>
+    <PrepareForBuildDependsOn>
+    </PrepareForBuildDependsOn>
+  </PropertyGroup>
+  <Import Condition=" Exists('Deployment.targets') " Project="Deployment.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- vertag<:>start tokens<:>maj.min -->
+  <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
+  <!-- vertag<:>end -->
+  <ItemGroup>
+    <Folder Include="Scripts\" />
+    <Folder Include="Tools\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Deployment.targets">
+      <Visible>False</Visible>
+    </None>
+    <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-storage.parameters.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.parameters.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-nat.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy.parameters.json" />
+    <None Include="Templates\IaaS-Nat\metadata.json" />
+    <None Include="Templates\IaaS-Nat\README.md" />
+    <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Tools\AzCopy.exe" />
+    <Content Include="Tools\Microsoft.Data.Edm.dll">
+      <Visible>False</Visible>
+    </Content>
+    <Content Include="Tools\Microsoft.Data.OData.dll">
+      <Visible>False</Visible>
+    </Content>
+    <Content Include="Tools\Microsoft.Data.Services.Client.dll">
+      <Visible>False</Visible>
+    </Content>
+    <Content Include="Tools\Microsoft.WindowsAzure.Storage.dll">
+      <Visible>False</Visible>
+    </Content>
+    <Content Include="Tools\Microsoft.WindowsAzure.Storage.DataMovement.dll">
+      <Visible>False</Visible>
+    </Content>
+  </ItemGroup>
+  <Target Name="GetReferenceAssemblyPaths" />
+</Project>

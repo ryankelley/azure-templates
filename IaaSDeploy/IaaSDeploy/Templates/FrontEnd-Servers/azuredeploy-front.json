@@ -1,0 +1,140 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+
+    "webVMSettings": {
+      "vmSize": "Standard_A1",
+      "adminUsername": "adminuser",
+      "adminPassword": "adminP@ssw0rd",
+      "publisher": "MicrosoftWindowsServer",
+      "offer": "WindowsServer",
+      "sku": "2012-R2-Datacenter",
+      "version": "latest",
+      "vmName": "WEB",
+      "osdisk": "osdiskweb",
+      "nicName": "NICWEB",
+      "pipName": "PIPWEB",
+      "avsetName": "ASWEB"
+    },
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('webVMSettings').pipName, copyindex(1))]",
+      "properties": {
+        "publicIPAllocationMethod": "dynamic"
+      },
+      "tags": {
+        "displayName": "PublicIPAddresses - Web"
+      },
+      "copy": {
+        "name": "webpipcount",
+        "count": "[parameters('webCount')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterfaces - Web"
+      },
+      "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]",
+        "[concat('Microsoft.Resources/deployments/', 'vnetTemplate')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('webVMSettings').pipName, copyindex(1)))]"
+              },
+              "subnet": {
+                "id": "[variables('frontEndSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "copy": {
+        "name": "webniccount",
+        "count": "[parameters('webCount')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('webVMSettings').avsetName]",
+      "location": "[variables('location')]",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "AvailabilitySet - Web"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1))]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('webCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, copyindex(1))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('webVMSettings').avsetName)]",
+        "[concat('Microsoft.Resources/deployments/', 'storageTemplate')]"
+      ],
+      "tags": {
+        "displayName": "VMs - Web"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('webVMSettings').avsetName)]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('webVMSettings').vmSize]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('webVMSettings').vmName,copyindex(1))]",
+          "adminUsername": "[variables('webVMSettings').adminUsername]",
+          "adminPassword": "[variables('webVMSettings').adminPassword]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('webVMSettings').publisher]",
+            "offer": "[variables('webVMSettings').offer]",
+            "sku": "[variables('webVMSettings').sku]",
+            "version": "[variables('webVMSettings').version]"
+          },
+          "osDisk": {
+            "name": "[concat(variables('webVMSettings').osdisk,copyindex(1))]",
+            "vhd": {
+              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('webVMSettings').osdisk, copyindex(1),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('webVMSettings').nicName,copyindex(1)))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+    "outputs": {
+    }
+}
