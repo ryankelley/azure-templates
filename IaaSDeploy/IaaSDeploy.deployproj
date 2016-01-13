@@ -34,6 +34,7 @@
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
+    <None Include="Templates\FrontEnd-Servers\azuredeploy-front.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.json" />

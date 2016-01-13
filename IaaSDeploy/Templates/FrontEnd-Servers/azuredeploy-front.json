@@ -2,9 +2,37 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "webCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of Web VMs to be deployed to the Front subnet."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "TestVNet",
+      "metadata": {
+        "description": "Name for the new VNet."
+      }
+    },
+    "frontEndSubnetName": {
+      "type": "string",
+      "defaultValue": "FrontEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
+      }
+    },
+    "stdStorageName": {
+      "type": "string",
+      "defaultValue": "rkvnetstrgstd",
+      "metadata": {
+        "description": "Name for simple storage account."
+      }
+    },
   },
   "variables": {
-
+    "location": "[resourceGroup().location]",
     "webVMSettings": {
       "vmSize": "Standard_A1",
       "adminUsername": "adminuser",
@@ -19,6 +47,9 @@
       "pipName": "PIPWEB",
       "avsetName": "ASWEB"
     },
+    "vmStorageAccountContainerName": "vhds",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
   },
   "resources": [
     {
@@ -46,8 +77,7 @@
       },
       "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]",
-        "[concat('Microsoft.Resources/deployments/', 'vnetTemplate')]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -91,8 +121,7 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, copyindex(1))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('webVMSettings').avsetName)]",
-        "[concat('Microsoft.Resources/deployments/', 'storageTemplate')]"
+        "[concat('Microsoft.Compute/availabilitySets/', variables('webVMSettings').avsetName)]"
       ],
       "tags": {
         "displayName": "VMs - Web"
