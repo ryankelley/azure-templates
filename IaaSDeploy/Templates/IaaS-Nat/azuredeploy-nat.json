@@ -119,7 +119,7 @@
     },
     "vmaIpAddress": {
       "type": "string",
-      "defaultValue": "192.168.0.4",
+      "defaultValue": "10.10.1.4",
       "metadata": {
         "description": "IP address for virtual appliance."
       }
@@ -160,7 +160,7 @@
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
     "dmzSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('dmzSubnetName'))]",
-    "templateBaseUrl": "https://raw.githubusercontent.com/ryankelley/azure-templates/master/IaaS-NAT/"
+    "templateBaseUrl": "https://raw.githubusercontent.com/ryankelley/azure-templates/master/IaaSDeploy/Templates/IaaS-Nat/"
   },
   "resources": [
     {
@@ -186,11 +186,11 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('templateBaseUrl'),'azuredeploy-vnet-nsg-udr.json')]",
+          "uri": "[concat(variables('templateBaseUrl'),'azuredeploy-vnet-router.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parametersLink": {
-          "uri": "[concat(variables('templateBaseUrl'),'azuredeploy-vnet-nsg-udr.parameters.json')]",
+          "uri": "[concat(variables('templateBaseUrl'),'azuredeploy-vnet-router.parameters.json')]",
           "contentVersion": "1.0.0.0"
         }
       }
@@ -230,7 +230,7 @@
             "properties": {
               "enableIPForwarding": true,
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat('192.168.0.',copyindex(4))]",
+              "privateIPAddress": "[concat('10.10.1.',copyindex(4))]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('fwVMSettings').pipName, copyindex(1)))]"
               },
