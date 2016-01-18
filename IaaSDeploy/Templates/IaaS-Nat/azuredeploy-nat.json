@@ -261,7 +261,6 @@
       ],
       "properties": {
         "enableIPForwarding": true,
-        "primary": false,
         "ipConfigurations": [
           {
             "name": "ipconfig2",
@@ -340,10 +339,12 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicName,copyindex(1)))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicName,copyindex(1)))]",
+              "properties": { "primary": true }
             },
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicNameNat))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicNameNat, copyindex(1)))]",
+              "properties": { "primary": false }
             }
           ]
         }
