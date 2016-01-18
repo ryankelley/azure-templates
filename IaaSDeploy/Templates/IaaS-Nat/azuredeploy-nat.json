@@ -141,16 +141,17 @@
   },
   "variables": {
     "fwVMSettings": {
-      "vmSize": "Standard_A1",
-      "adminUsername": "adminuser",
+      "vmSize": "Standard_D2",
+      "adminUsername": "ubuntu",
       "adminPassword": "adminP@ssw0rd",
-      "publisher": "MicrosoftWindowsServer",
-      "offer": "WindowsServer",
-      "sku": "2012-R2-Datacenter",
+      "publisher": "Canonical",
+      "offer": "UbuntuServer",
+      "sku": "14.04.2-LTS",
       "version": "latest",
       "vmName": "FW",
       "osdisk": "osdiskfw",
       "nicName": "NICFW",
+      "nicNameNat": "NATFW",
       "pipName": "PIPFW",
       "avsetName": "ASFW"
     },
@@ -228,7 +229,6 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "enableIPForwarding": true,
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[concat('10.10.1.',copyindex(4))]",
               "publicIPAddress": {
@@ -239,10 +239,44 @@
               }
             }
           }
+        ],
+        "enableIPForwarding": true,
+        "primary": true
+      },
+      "copy": {
+        "name": "fwCount",
+        "count": "[parameters('fwCount')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterfaces - NAT"
+      },
+      "name": "[concat(variables('fwVMSettings').nicNameNat, copyindex(1))]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'vnetTemplate')]"
+      ],
+      "properties": {
+        "enableIPForwarding": true,
+        "primary": false,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig2",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.10.1.250",
+              "subnet": {
+                "id": "[variables('dmzSubnetRef')]"
+              }
+            }
+          }
         ]
       },
       "copy": {
-        "name": "fwniccount",
+        "name": "fwCount",
         "count": "[parameters('fwCount')]"
       }
     },
@@ -268,6 +302,7 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('fwVMSettings').nicName, copyindex(1))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('fwVMSettings').nicNameNat, copyindex(1))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('fwVMSettings').avsetName)]",
         "[concat('Microsoft.Resources/deployments/', 'storageTemplate')]"
       ],
@@ -306,6 +341,9 @@
           "networkInterfaces": [
             {
               "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicName,copyindex(1)))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicNameNat))]"
             }
           ]
         }
