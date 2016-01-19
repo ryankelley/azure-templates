@@ -153,6 +153,7 @@
       "nicName": "NICFW",
       "nicNameNat": "NATFW",
       "pipName": "PIPFW",
+      "pipNameNat": "PIPFNAT",
       "avsetName": "ASFW"
     },
     "location": "[resourceGroup().location]",
@@ -211,8 +212,7 @@
         "name": "webpipcount",
         "count": "[parameters('fwCount')]"
       }
-    },
-    {
+    },{
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[variables('location')]",
@@ -240,8 +240,7 @@
             }
           }
         ],
-        "enableIPForwarding": true,
-        "primary": true
+        "enableIPForwarding": true
       },
       "copy": {
         "name": "fwCount",
@@ -266,9 +265,9 @@
             "name": "ipconfig2",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.10.1.250",
+              "privateIPAddress": "10.10.5.250",
               "subnet": {
-                "id": "[variables('dmzSubnetRef')]"
+                "id": "[variables('frontEndSubnetRef')]"
               }
             }
           }
