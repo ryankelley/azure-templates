@@ -10,8 +10,8 @@
     "frontEndSubnetPrefix": { "value": "10.10.5.0/24" },
     "backEndSubnetName": { "value": "BackEnd" },
     "backEndSubnetPrefix": { "value": "10.10.10.0/24" },
-    "frontEndNSGName": { "value": "NSG-BackEnd" },
-    "backEndNSGName": { "value": "NSG-FrontEnd" },
+    "frontEndNSGName": { "value": "NSG-FrontEnd" },
+    "backEndNSGName": { "value": "NSG-BackEnd" },
     "vmaIpAddress": { "value": "10.10.1.4" },
     "frontEndRouteTableName": { "value": "RT-FrontEnd" },
     "backEndRouteTableName": {"value": "RT-BackEnd"}

@@ -30,6 +30,13 @@
         "description": "Name for simple storage account."
       }
     },
+    "frontEndNSGName": {
+      "type": "string",
+      "defaultValue": "NSG-FrontEnd",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -80,6 +87,7 @@
         "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]"
       ],
       "properties": {
+        "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/virtualNetworks',parameters('frontEndNSGName'))]"},
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -91,6 +99,7 @@
               "subnet": {
                 "id": "[variables('frontEndSubnetRef')]"
               }
+
             }
           }
         ]

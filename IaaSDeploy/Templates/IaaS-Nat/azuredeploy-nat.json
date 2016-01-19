@@ -141,7 +141,7 @@
   },
   "variables": {
     "fwVMSettings": {
-      "vmSize": "Standard_D2",
+      "vmSize": "Standard_D1",
       "adminUsername": "ubuntu",
       "adminPassword": "adminP@ssw0rd",
       "publisher": "Canonical",
@@ -249,37 +249,6 @@
     },
     {
       "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[variables('location')]",
-      "tags": {
-        "displayName": "NetworkInterfaces - NAT"
-      },
-      "name": "[concat(variables('fwVMSettings').nicNameNat, copyindex(1))]",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'vnetTemplate')]"
-      ],
-      "properties": {
-        "enableIPForwarding": true,
-        "ipConfigurations": [
-          {
-            "name": "ipconfig2",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.10.5.250",
-              "subnet": {
-                "id": "[variables('frontEndSubnetRef')]"
-              }
-            }
-          }
-        ]
-      },
-      "copy": {
-        "name": "fwCount",
-        "count": "[parameters('fwCount')]"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('fwVMSettings').avsetName]",
       "location": "[variables('location')]",
@@ -300,7 +269,6 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('fwVMSettings').nicName, copyindex(1))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fwVMSettings').nicNameNat, copyindex(1))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('fwVMSettings').avsetName)]",
         "[concat('Microsoft.Resources/deployments/', 'storageTemplate')]"
       ],
@@ -340,10 +308,6 @@
             {
               "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicName,copyindex(1)))]",
               "properties": { "primary": true }
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicNameNat, copyindex(1)))]",
-              "properties": { "primary": false }
             }
           ]
         }
