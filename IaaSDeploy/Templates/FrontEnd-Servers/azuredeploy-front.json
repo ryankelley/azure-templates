@@ -41,7 +41,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "webVMSettings": {
-      "vmSize": "Standard_A1",
+      "vmSize": "Standard_D1",
       "adminUsername": "adminuser",
       "adminPassword": "adminP@ssw0rd",
       "publisher": "MicrosoftWindowsServer",
@@ -57,22 +57,21 @@
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
+    "loadBalancerName": "LBFront",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
   },
   "resources": [
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[variables('location')]",
-      "name": "[concat(variables('webVMSettings').pipName, copyindex(1))]",
+      "name": "[variables('webVMSettings').pipName]",
       "properties": {
         "publicIPAllocationMethod": "dynamic"
       },
       "tags": {
-        "displayName": "PublicIPAddresses - Web"
-      },
-      "copy": {
-        "name": "webpipcount",
-        "count": "[parameters('webCount')]"
+        "displayName": "PublicIPAddresses - LB"
       }
     },
     {
@@ -84,22 +83,29 @@
       },
       "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]"
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
       ],
       "properties": {
-        "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/virtualNetworks',parameters('frontEndNSGName'))]"},
+        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]" },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('webVMSettings').pipName, copyindex(1)))]"
-              },
+
               "subnet": {
                 "id": "[variables('frontEndSubnetRef')]"
-              }
-
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/LoadBalancerBackend')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/RDP', copyIndex(1))]"
+                }
+              ]
             }
           }
         ]
@@ -117,6 +123,59 @@
       "dependsOn": [ ],
       "tags": {
         "displayName": "AvailabilitySet - Web"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[variables('loadBalancerName')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName)]"
+      ],
+      "tags": { "displayName": "Load Balancer" },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "loadBalancerFrontEnd",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('webVMSettings').pipName)]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "loadBalancerBackEnd"
+          }
+        ],
+        "inboundNatRules": [
+          {
+            "name": "RDP1",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 3389,
+              "backendPort": 3389,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "RDP2",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 3390,
+              "backendPort": 3389,
+              "enableFloatingIP": false
+            }
+          }
+        ]
       }
     },
     {
@@ -173,6 +232,6 @@
       }
     }
   ],
-    "outputs": {
-    }
+  "outputs": {
+  }
 }
