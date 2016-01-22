@@ -4,6 +4,12 @@
     "parameters": {
         "webCount": {
             "value": 2
+        },
+        "certData": {
+            "value": ""
+        },
+        "certPassword": {
+            "value": ""
         }
     }
 }

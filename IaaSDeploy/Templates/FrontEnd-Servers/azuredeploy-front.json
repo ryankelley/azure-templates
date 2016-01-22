@@ -16,18 +16,18 @@
         "description": "Name for the new VNet."
       }
     },
-    "frontEndSubnetName": {
-      "type": "string",
-      "defaultValue": "FrontEnd",
-      "metadata": {
-        "description": "Name for the front end subnet."
-      }
-    },
     "stdStorageName": {
       "type": "string",
       "defaultValue": "rkvnetstrgstd",
       "metadata": {
         "description": "Name for simple storage account."
+      }
+    },
+    "frontEndSubnetName": {
+      "type": "string",
+      "defaultValue": "FrontEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
       }
     },
     "frontEndNSGName": {
@@ -36,7 +36,52 @@
       "metadata": {
         "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
       }
-    }
+    },
+    "backEndSubnetName": {
+      "type": "string",
+      "defaultValue": "BackEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
+      }
+    },
+    "backEndNSGName": {
+      "type": "string",
+      "defaultValue": "NSG-BackEnd",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
+      }
+    },
+    "skuName": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_Small",
+                "Standard_Medium",
+                "Standard_Large"
+            ],
+            "defaultValue": "Standard_Medium",
+            "metadata": {
+                "description": "Sku Name"
+            }
+        },
+        "capacity": {
+            "type": "int",
+            "defaultValue": 2,
+            "metadata": {
+                "description": "Number of instances"
+            }
+        },
+        "certData": {
+            "type": "string",
+            "metadata": {
+                "description": "Base-64 encoded form of the .pfx file"
+            }
+        },
+        "certPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for .pfx certificate"
+            }
+        }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -55,23 +100,40 @@
       "avsetName": "ASWEB"
     },
     "vmStorageAccountContainerName": "vhds",
+    "gatewayPip": "gatePIP",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
-    "loadBalancerName": "LBFront",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
-    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
+    "applicationGatewayName": "agfront",
+    "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways',variables('applicationGatewayName'))]",
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
   },
   "resources": [
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[variables('location')]",
-      "name": "[variables('webVMSettings').pipName]",
+      "name": "[concat(variables('webVMSettings').pipName, copyindex(1))]",
       "properties": {
         "publicIPAllocationMethod": "dynamic"
       },
       "tags": {
-        "displayName": "PublicIPAddresses - LB"
+        "displayName": "PublicIPAddresses - Web"
+      },
+      "copy": {
+        "name": "webpipcount",
+        "count": "[parameters('webCount')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('location')]",
+      "name": "[variables('gatewayPip')]",
+      "properties": {
+        "publicIPAllocationMethod": "dynamic"
+      },
+      "tags": {
+        "displayName": "PublicIPAddresses - Gateway"
       }
     },
     {
@@ -83,29 +145,22 @@
       },
       "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]"
       ],
       "properties": {
-        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]" },
+        "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]"},
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('webVMSettings').pipName, copyindex(1)))]"
+              },
               "subnet": {
                 "id": "[variables('frontEndSubnetRef')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/LoadBalancerBackend')]"
-                }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/RDP', copyIndex(1))]"
-                }
-              ]
+              }
+
             }
           }
         ]
@@ -127,52 +182,115 @@
     },
     {
       "apiVersion": "2015-06-15",
-      "name": "[variables('loadBalancerName')]",
-      "type": "Microsoft.Network/loadBalancers",
+      "name": "[variables('applicationGatewayName')]",
+      "type": "Microsoft.Network/applicationGateways",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName)]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName, 1)]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
       ],
-      "tags": { "displayName": "Load Balancer" },
+      "tags": {
+        "displayName": "Application Gateway - Web"
+      },
       "properties": {
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "Standard",
+          "capacity": "[parameters('capacity')]"
+        },
+        "sslCertificates": [
+          {
+            "name": "appGatewaySslCert",
+            "properties": {
+              "data": "[parameters('certData')]",
+              "password": "[parameters('certPassword')]"
+            }
+          }
+        ],
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('frontEndSubnetRef')]"
+              }
+            }
+          }
+        ],
         "frontendIPConfigurations": [
           {
-            "name": "loadBalancerFrontEnd",
+            "name": "appGatewayFrontendIP",
             "properties": {
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('webVMSettings').pipName)]"
+              "PublicIPAddress": {
+                "id": "[variables('publicIPRef')]"
               }
+            }
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": 443
             }
           }
         ],
         "backendAddressPools": [
           {
-            "name": "loadBalancerBackEnd"
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": [
+                {
+                  "IpAddress": "104.42.121.167"
+                },
+                {
+                  "IpAddress": "104.42.125.224"
+                }
+              ]
+            }
           }
         ],
-        "inboundNatRules": [
+        "backendHttpSettingsCollection": [
           {
-            "name": "RDP1",
+            "name": "appGatewayBackendHttpSettings",
             "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 3389,
-              "backendPort": 3389,
-              "enableFloatingIP": false
+              "Port": 80,
+              "Protocol": "Http",
+              "CookieBasedAffinity": "Disabled"
             }
-          },
+          }
+        ],
+        "httpListeners": [
           {
-            "name": "RDP2",
+            "name": "appGatewayHttpListener",
             "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('frontEndIPConfigID')]"
+              "FrontendIPConfiguration": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/appGatewayFrontendIP')]"
               },
-              "protocol": "tcp",
-              "frontendPort": 3390,
-              "backendPort": 3389,
-              "enableFloatingIP": false
+              "FrontendPort": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
+              },
+              "Protocol": "Https",
+              "SslCertificate": {
+                "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/appGatewaySslCert')]"
+              }
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "Basic",
+              "httpListener": {
+                "id": "[concat(variables('applicationGatewayID'), '/httpListeners/appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendAddressPools/appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+              }
             }
           }
         ]
