@@ -103,6 +103,7 @@
     "gatewayPip": "gatePIP",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
+    "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
     "applicationGatewayName": "agfront",
     "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways',variables('applicationGatewayName'))]",
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
@@ -212,7 +213,7 @@
             "name": "appGatewayIpConfig",
             "properties": {
               "subnet": {
-                "id": "[variables('frontEndSubnetRef')]"
+                "id": "[variables('backEndSubnetRef')]"
               }
             }
           }
