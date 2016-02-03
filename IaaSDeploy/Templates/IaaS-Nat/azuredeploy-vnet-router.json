@@ -67,7 +67,7 @@
     },
     "mgmtSubnetPrefix": {
       "type": "string",
-      "defaultValue": "10.10.5.0/24",
+      "defaultValue": "10.10.15.0/24",
       "metadata": {
         "description": "CIDR address prefix for the back end subnet."
       }
