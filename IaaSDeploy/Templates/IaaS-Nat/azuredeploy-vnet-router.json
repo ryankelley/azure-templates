@@ -58,6 +58,20 @@
         "description": "CIDR address prefix for the back end subnet."
       }
     },
+    "mgmtSubnetName": {
+      "type": "string",
+      "defaultValue": "Mgmt",
+      "metadata": {
+        "description": "Name for the back end subnet."
+      }
+    },
+    "mgmtSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.10.5.0/24",
+      "metadata": {
+        "description": "CIDR address prefix for the back end subnet."
+      }
+    },
     "frontEndNSGName": {
       "type": "string",
       "defaultValue": "NSG-Front",
@@ -68,6 +82,13 @@
     "backEndNSGName": {
       "type": "string",
       "defaultValue": "NSG-Back",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, SQL, and block Internet."
+      }
+    },
+    "mgmtNSGName": {
+      "type": "string",
+      "defaultValue": "NSG-Mgmt",
       "metadata": {
         "description": "Name for the NSG used to allow RDP, SQL, and block Internet."
       }
@@ -235,7 +256,28 @@
       "name": "[parameters('frontEndRouteTableName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "UDR - FrontEnd"
+        "displayName": "Route Table - FrontEnd"
+      },
+      "properties": {
+        "routes": [
+          {
+            "name": "RouteToBackEnd",
+            "properties": {
+              "addressPrefix": "[parameters('backEndSubnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
+            }
+          }
+        ]
+      }
+    },
+     {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/routeTables",
+      "name": "[parameters('frontEndRouteTableName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Route Table - Mgmt"
       },
       "properties": {
         "routes": [
@@ -298,6 +340,18 @@
               },
               "routeTable": {
                   "id": "[resourceId('Microsoft.Network/routeTables', parameters('backEndRouteTableName'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('mgmtSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNSGName'))]"
+              },
+              "routeTable": {
+                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('mgmtRouteTableName'))]"
               }
             }
           }

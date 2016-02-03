@@ -199,15 +199,6 @@
           "tier": "Standard",
           "capacity": "[parameters('capacity')]"
         },
-        "sslCertificates": [
-          {
-            "name": "appGatewaySslCert",
-            "properties": {
-              "data": "[parameters('certData')]",
-              "password": "[parameters('certPassword')]"
-            }
-          }
-        ],
         "gatewayIPConfigurations": [
           {
             "name": "appGatewayIpConfig",
@@ -232,7 +223,7 @@
           {
             "name": "appGatewayFrontendPort",
             "properties": {
-              "Port": 443
+              "Port": 80
             }
           }
         ],
@@ -242,10 +233,10 @@
             "properties": {
               "BackendAddresses": [
                 {
-                  "IpAddress": "104.42.121.167"
+                  "IpAddress": "104.40.29.5"
                 },
                 {
-                  "IpAddress": "104.42.125.224"
+                  "IpAddress": "104.40.16.186"
                 }
               ]
             }
@@ -271,10 +262,7 @@
               "FrontendPort": {
                 "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
               },
-              "Protocol": "Https",
-              "SslCertificate": {
-                "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/appGatewaySslCert')]"
-              }
+              "Protocol": "Http"
             }
           }
         ],
