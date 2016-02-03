@@ -131,7 +131,7 @@
       "name": "[parameters('backEndNSGName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "NSG - Remote Access"
+        "displayName": "NSG - Back"
       },
       "properties": {
         "securityRules": [
@@ -238,6 +238,33 @@
     },
     {
       "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('mgmtNSGName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NSG - Mgmt"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "rdp-rule",
+            "properties": {
+              "description": "Allow RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/routeTables",
       "name": "[parameters('backEndRouteTableName')]",
       "location": "[resourceGroup().location]",
@@ -323,8 +350,10 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', parameters('frontEndNSGName'))]",
         "[concat('Microsoft.Network/networkSecurityGroups/', parameters('backEndNSGName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('mgmtNSGName'))]",
         "[concat('Microsoft.Network/routeTables/', parameters('frontEndRouteTableName'))]",
-        "[concat('Microsoft.Network/routeTables/', parameters('backEndRouteTableName'))]"
+        "[concat('Microsoft.Network/routeTables/', parameters('backEndRouteTableName'))]",
+        "[concat('Microsoft.Network/routeTables/', parameters('mgmtRouteTableName'))]"
       ],
       "tags": {
         "displayName": "VNet"
