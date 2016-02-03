@@ -35,6 +35,7 @@
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.parameters.json" />
+    <None Include="Templates\IaaS-Nat\azuredeploy-prod.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.json" />
@@ -43,6 +44,7 @@
     <None Include="Templates\IaaS-Nat\azuredeploy.parameters.json" />
     <None Include="Templates\IaaS-Nat\metadata.json" />
     <None Include="Templates\IaaS-Nat\README.md" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />
     <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
   </ItemGroup>
   <ItemGroup>
