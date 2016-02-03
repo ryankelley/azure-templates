@@ -6,7 +6,13 @@
       "value": "Standard_LRS"
     },
     "prmStorageType": {
-      "value": "Premium_LRS" 
-    }
+      "value": "Premium_LRS"
+    },
+     "stdStorageName": {
+          "value": "kno2prodvnetstgstd"
+      },
+      "prmStorageName": {
+          "value": "kno2prodvnetstgprm"
+      },
   }
 }
