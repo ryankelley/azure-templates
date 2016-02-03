@@ -33,9 +33,6 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <None Include="Templates\101-ALB-Nat\azuredeploy-lb-nat.json" />
-    <None Include="Templates\101-ALB-Nat\azuredeploy-lbnat.parameters.json" />
-    <None Include="Templates\101-application-gateway-public-ip-ssl-offload\azuredeploy.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
