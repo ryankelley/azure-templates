@@ -44,6 +44,7 @@
     <None Include="Templates\IaaS-Nat\azuredeploy.parameters.json" />
     <None Include="Templates\IaaS-Nat\metadata.json" />
     <None Include="Templates\IaaS-Nat\README.md" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-prod.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />
     <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
   </ItemGroup>
