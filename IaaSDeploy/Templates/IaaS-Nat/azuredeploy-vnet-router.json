@@ -113,6 +113,13 @@
       "metadata": {
         "description": "Name for back end subnet route table."
       }
+    }    ,
+    "mgmtRouteTableName": {
+      "type": "string",
+      "defaultValue": "RT-Mgmt",
+      "metadata": {
+        "description": "Name for back end subnet route table."
+      }
     }    
   },
   "variables": {
@@ -267,6 +274,14 @@
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[parameters('vmaIpAddress')]"
             }
+          },
+          {
+            "name": "Default",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
+            }
           }
         ]
       }
@@ -285,6 +300,14 @@
             "name": "RouteToBackEnd",
             "properties": {
               "addressPrefix": "[parameters('backEndSubnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
+            }
+          },
+          {
+            "name": "Default",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[parameters('vmaIpAddress')]"
             }
