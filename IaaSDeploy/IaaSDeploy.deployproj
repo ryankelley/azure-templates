@@ -33,13 +33,13 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="Templates\DomainController\azuredeploy-domain-prod.parameters.json" />
+    <None Include="Templates\DomainController\azuredeploy-domain.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-prod.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
-    <None Include="Templates\IaaS-Nat\azuredeploy-storage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.json" />
-    <None Include="Templates\IaaS-Nat\azuredeploy-vnet-router.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-nat.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy.parameters.json" />
     <None Include="Templates\IaaS-Nat\metadata.json" />
