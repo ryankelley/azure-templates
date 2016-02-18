@@ -4,14 +4,14 @@
   "parameters": {
     "vnetName": {
       "type": "string",
-      "defaultValue": "K2ProdVNet",
+      "defaultValue": "VNetName",
       "metadata": {
         "description": "Name for the new VNet."
       }
     },
     "stdStorageName": {
       "type": "string",
-      "defaultValue": "kno2prodvnetstgstd",
+      "defaultValue": "StorageAccount",
       "metadata": {
         "description": "Name for simple storage account."
       }
@@ -42,14 +42,14 @@
       "sku": "2012-R2-Datacenter",
       "version": "latest",
       "vmName": "MGMTKno2",
-      "osdisk": "osdiskweb",
+      "osdisk": "osdiskmgmt",
       "nicName": "NICMGMT",
       "pipName": "PIPMGMT",
       "avsetName": "ASMGMT"
     },
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
-    "mgmtSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]",
+    "mgmtSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]"
   },
   "resources": [
     {

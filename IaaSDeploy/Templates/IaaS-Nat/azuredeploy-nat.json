@@ -65,15 +65,16 @@
         "description": "CIDR address prefix for the back end subnet."
       }
     },
-     "mgmtSubnetName": {
+    "mgmtSubnetName": {
       "type": "string",
-      "defaultValue": "BackEnd",
+      "defaultValue": "MGMT",
       "metadata": {
         "description": "Name for the back end subnet."
       }
-    },"mgmtSubnetPrefix": {
+    },
+    "mgmtSubnetPrefix": {
       "type": "string",
-      "defaultValue": "10.10.10.0/24",
+      "defaultValue": "10.10.15.0/24",
       "metadata": {
         "description": "CIDR address prefix for the back end subnet."
       }
@@ -92,9 +93,10 @@
       "metadata": {
         "description": "Name for the NSG used to allow RDP, SQL, and block Internet"
       }
-    },"mgmtNSGName": {
+    },
+    "mgmtNSGName": {
       "type": "string",
-      "defaultValue": "NSG-BackEnd",
+      "defaultValue": "NSG-Mgmt",
       "metadata": {
         "description": "Name for the NSG used to allow RDP, SQL, and block Internet"
       }
@@ -157,20 +159,6 @@
       "metadata": {
         "description": "Name for back end subnet route table."
       }
-    },
-    "storageTemplateParameters": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Name of the template."
-      }
-    },
-    "networkTemplateParameters": {
-      "type": "string",
-      "defaultValue": "TestVNet",
-      "metadata": {
-        "description": "Name for the new VNet."
-      }
     }
   },
   "variables": {
@@ -210,10 +198,10 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "stdStorageType": {"value": "[parameters('stdStorageType')]"},
-          "prmStorageType": {"value": "[parameters('prmStorageType')]"},
-          "stdStorageName": {"value": "[parameters('stdStorageName')]"},
-          "prmStorageName": {"value": "[parameters('prmStorageName')]"}
+          "stdStorageType": { "value": "[parameters('stdStorageType')]" },
+          "prmStorageType": { "value": "[parameters('prmStorageType')]" },
+          "stdStorageName": { "value": "[parameters('stdStorageName')]" },
+          "prmStorageName": { "value": "[parameters('prmStorageName')]" }
         }
       }
     },
@@ -228,22 +216,22 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-    "vnetName": { "value":"[parameters('vnetName')]" },
-    "vnetPrefix": { "value":"[parameters('vnetPrefix')]" },
-    "dmzSubnetName": { "value": "[parameters('dmzSubnetName')]" },
-    "dmzSubnetPrefix": { "value": "[parameters('dmzSubnetPrefix')]" },
-    "frontEndSubnetName": { "value": "[parameters('frontEndSubnetName')]" },
-    "frontEndSubnetPrefix": { "value": "[parameters('frontEndSubnetPrefix')]" },
-    "backEndSubnetName": { "value": "[parameters('backEndSubnetName')]" },
-    "backEndSubnetPrefix": { "value": "[parameters('backEndSubnetPrefix')]" },
-    "mgmtSubnetName": { "value": "[parameters('mgmtSubnetName')]" },
-    "mgmtSubnetPrefix": { "value": "[parameters('mgmtSubnetPrefix')]" },
-    "frontEndNSGName": { "value": "[parameters('frontEndNSGName')]" },
-    "backEndNSGName": { "value": "[parameters('backEndNSGName')]" },
-    "vmaIpAddress": { "value": "[parameters('vmaIpAddress')]" },
-    "frontEndRouteTableName": { "value": "[parameters('frontEndRouteTableName')]" },
-    "backEndRouteTableName": {"value": "[parameters('backEndRouteTableName')]"}
-  }
+          "vnetName": { "value": "[parameters('vnetName')]" },
+          "vnetPrefix": { "value": "[parameters('vnetPrefix')]" },
+          "dmzSubnetName": { "value": "[parameters('dmzSubnetName')]" },
+          "dmzSubnetPrefix": { "value": "[parameters('dmzSubnetPrefix')]" },
+          "frontEndSubnetName": { "value": "[parameters('frontEndSubnetName')]" },
+          "frontEndSubnetPrefix": { "value": "[parameters('frontEndSubnetPrefix')]" },
+          "backEndSubnetName": { "value": "[parameters('backEndSubnetName')]" },
+          "backEndSubnetPrefix": { "value": "[parameters('backEndSubnetPrefix')]" },
+          "mgmtSubnetName": { "value": "[parameters('mgmtSubnetName')]" },
+          "mgmtSubnetPrefix": { "value": "[parameters('mgmtSubnetPrefix')]" },
+          "frontEndNSGName": { "value": "[parameters('frontEndNSGName')]" },
+          "backEndNSGName": { "value": "[parameters('backEndNSGName')]" },
+          "vmaIpAddress": { "value": "[parameters('vmaIpAddress')]" },
+          "frontEndRouteTableName": { "value": "[parameters('frontEndRouteTableName')]" },
+          "backEndRouteTableName": { "value": "[parameters('backEndRouteTableName')]" }
+        }
       }
     },
     {
@@ -261,7 +249,8 @@
         "name": "webpipcount",
         "count": "[parameters('fwCount')]"
       }
-    },{
+    },
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[variables('location')]",
