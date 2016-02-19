@@ -114,7 +114,7 @@
         "[concat('Microsoft.Compute/availabilitySets/', variables('mgmtVMSettings').avsetName)]"
       ],
       "tags": {
-        "displayName": "VMs - Mgmt"
+        "displayName": "VM - Mgmt"
       },
       "properties": {
         "availabilitySet": {

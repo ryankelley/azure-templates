@@ -194,3 +194,4 @@ UpgradeLog*.htm
 *.ldf
 
 *-prod.parameters.json
+*-stage.parameters.json

@@ -330,14 +330,6 @@
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[parameters('vmaIpAddress')]"
             }
-          },
-          {
-            "name": "Default",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
-            }
           }
         ]
       }
