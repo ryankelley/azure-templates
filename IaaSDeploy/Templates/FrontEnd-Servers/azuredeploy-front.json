@@ -52,36 +52,68 @@
       }
     },
     "skuName": {
-            "type": "string",
-            "allowedValues": [
-                "Standard_Small",
-                "Standard_Medium",
-                "Standard_Large"
-            ],
-            "defaultValue": "Standard_Medium",
-            "metadata": {
-                "description": "Sku Name"
-            }
-        },
-        "capacity": {
-            "type": "int",
-            "defaultValue": 2,
-            "metadata": {
-                "description": "Number of instances"
-            }
-        },
-        "certData": {
-            "type": "string",
-            "metadata": {
-                "description": "Base-64 encoded form of the .pfx file"
-            }
-        },
-        "certPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for .pfx certificate"
-            }
-        }
+      "type": "string",
+      "allowedValues": [
+        "Standard_Small",
+        "Standard_Medium",
+        "Standard_Large"
+      ],
+      "defaultValue": "Standard_Medium",
+      "metadata": {
+        "description": "Sku Name"
+      }
+    },
+    "capacity": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of instances"
+      }
+    },
+    "certData": {
+      "type": "string",
+      "metadata": {
+        "description": "Base-64 encoded form of the .pfx file"
+      }
+    },
+    "certPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for .pfx certificate"
+      }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the AD domain"
+      }
+    },
+    "domainUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username of the account on the domain"
+      }
+    },
+    "domainPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password of the account on the domain"
+      }
+    },
+    "ouPath": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies an organizational unit (OU) for the domain account. Enter the full distinguished name of the OU in quotation marks. Example: 'OU=testOU; DC=domain; DC=Domain; DC=com'"
+      }
+    },
+    "domainJoinOptions": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -96,7 +128,6 @@
       "vmName": "WEB",
       "osdisk": "osdiskweb",
       "nicName": "NICWEB",
-      "pipName": "PIPWEB",
       "avsetName": "ASWEB"
     },
     "vmStorageAccountContainerName": "vhds",
@@ -109,22 +140,6 @@
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
   },
   "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[variables('location')]",
-      "name": "[concat(variables('webVMSettings').pipName, copyindex(1))]",
-      "properties": {
-        "publicIPAllocationMethod": "dynamic"
-      },
-      "tags": {
-        "displayName": "PublicIPAddresses - Web"
-      },
-      "copy": {
-        "name": "webpipcount",
-        "count": "[parameters('webCount')]"
-      }
-    },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -145,19 +160,14 @@
         "displayName": "NetworkInterfaces - Web"
       },
       "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('webVMSettings').pipName, copyindex(1))]"
-      ],
       "properties": {
-        "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]"},
+        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]" },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('webVMSettings').pipName, copyindex(1)))]"
-              },
+
               "subnet": {
                 "id": "[variables('frontEndSubnetRef')]"
               }
@@ -179,110 +189,6 @@
       "dependsOn": [ ],
       "tags": {
         "displayName": "AvailabilitySet - Web"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "name": "[variables('applicationGatewayName')]",
-      "type": "Microsoft.Network/applicationGateways",
-      "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName, 1)]",
-        "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
-      ],
-      "tags": {
-        "displayName": "Application Gateway - Web"
-      },
-      "properties": {
-        "sku": {
-          "name": "[parameters('skuName')]",
-          "tier": "Standard",
-          "capacity": "[parameters('capacity')]"
-        },
-        "gatewayIPConfigurations": [
-          {
-            "name": "appGatewayIpConfig",
-            "properties": {
-              "subnet": {
-                "id": "[variables('backEndSubnetRef')]"
-              }
-            }
-          }
-        ],
-        "frontendIPConfigurations": [
-          {
-            "name": "appGatewayFrontendIP",
-            "properties": {
-              "PublicIPAddress": {
-                "id": "[variables('publicIPRef')]"
-              }
-            }
-          }
-        ],
-        "frontendPorts": [
-          {
-            "name": "appGatewayFrontendPort",
-            "properties": {
-              "Port": 80
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "appGatewayBackendPool",
-            "properties": {
-              "BackendAddresses": [
-                {
-                  "IpAddress": "104.40.29.5"
-                },
-                {
-                  "IpAddress": "104.40.16.186"
-                }
-              ]
-            }
-          }
-        ],
-        "backendHttpSettingsCollection": [
-          {
-            "name": "appGatewayBackendHttpSettings",
-            "properties": {
-              "Port": 80,
-              "Protocol": "Http",
-              "CookieBasedAffinity": "Disabled"
-            }
-          }
-        ],
-        "httpListeners": [
-          {
-            "name": "appGatewayHttpListener",
-            "properties": {
-              "FrontendIPConfiguration": {
-                "Id": "[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/appGatewayFrontendIP')]"
-              },
-              "FrontendPort": {
-                "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
-              },
-              "Protocol": "Http"
-            }
-          }
-        ],
-        "requestRoutingRules": [
-          {
-            "Name": "rule1",
-            "properties": {
-              "RuleType": "Basic",
-              "httpListener": {
-                "id": "[concat(variables('applicationGatewayID'), '/httpListeners/appGatewayHttpListener')]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(variables('applicationGatewayID'), '/backendAddressPools/appGatewayBackendPool')]"
-              },
-              "backendHttpSettings": {
-                "id": "[concat(variables('applicationGatewayID'), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
-              }
-            }
-          }
-        ]
       }
     },
     {
@@ -337,8 +243,167 @@
           ]
         }
       }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/joindomain')]",
+      "location": "[resourceGroup().location]",
+       "tags": {
+        "displayName": "Join Domain - Web"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('webVMSettings').vmName,copyindex(1)))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "JsonADDomainExtension",
+        "typeHandlerVersion": "1.0",
+        "settings": {
+          "Name": "[parameters('domainToJoin')]",
+          "OUPath": "[parameters('ouPath')]",
+          "User": "kno2testdomain.local\\knodmin",
+          "Restart": "true",
+          "Options": "[parameters('domainJoinOptions')]"
+        },
+        "protectedsettings": {
+          "Password": "[parameters('domainPassword')]"
+        }
+      },
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('webCount')]"
+      },
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[variables('applicationGatewayName')]",
+      "type": "Microsoft.Network/applicationGateways",
+
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 1)]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 2)]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName, 1)]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
+      ],
+      "tags": {
+        "displayName": "Application Gateway - Web"
+      },
+      "properties": {
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "Standard",
+          "capacity": "[parameters('capacity')]"
+        },
+        "sslCertificates": [
+          {
+            "name": "appGatewaySslCert",
+            "properties": {
+              "data": "[parameters('certData')]",
+              "password": "[parameters('certPassword')]"
+            }
+          }
+        ],
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('backEndSubnetRef')]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGatewayFrontendIP",
+            "properties": {
+              "PublicIPAddress": {
+                "id": "[variables('publicIPRef')]"
+              }
+            }
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": 443
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": [
+                {
+                  "IpAddress": "[reference(concat(variables('webVMSettings').nicName, 1)).ipConfigurations[0].properties.privateIPAddress]"
+                },
+                {
+                  "IpAddress": "[reference(concat(variables('webVMSettings').nicName, 2)).ipConfigurations[0].properties.privateIPAddress]"
+                }
+              ]
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "appGatewayBackendHttpSettings",
+            "properties": {
+              "Port": 80,
+              "Protocol": "Http",
+              "CookieBasedAffinity": "Disabled"
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "appGatewayHttpListener",
+            "properties": {
+              "FrontendIPConfiguration": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/appGatewayFrontendIP')]"
+              },
+              "FrontendPort": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
+              },
+              "Protocol": "Https",
+              "SslCertificate": {
+                "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/appGatewaySslCert')]"
+              }
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "Basic",
+              "httpListener": {
+                "id": "[concat(variables('applicationGatewayID'), '/httpListeners/appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendAddressPools/appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+              }
+            }
+          }
+        ]
+      }
     }
+
   ],
   "outputs": {
+    "nicname1": {
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 1)]",
+      "type": "string"
+    },
+    "nicname2": {
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 2)]",
+      "type": "string"
+    }
   }
 }

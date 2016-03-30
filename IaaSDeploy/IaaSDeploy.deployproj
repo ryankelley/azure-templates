@@ -33,10 +33,14 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="Templates\app-gateway-front\azuredeploy-appGateway.json" />
+    <None Include="Templates\app-gateway-front\azuredeploy-appGateway-stage.parameters.json" />
+    <None Include="Templates\app-gateway-ssl-offload-sample\azuredeploy-ag-ssl.json" />
+    <None Include="Templates\DomainController\azuredeploy-domain-stage.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain-prod.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
-    <None Include="Templates\FrontEnd-Servers\azuredeploy-front.parameters.json" />
+    <None Include="Templates\FrontEnd-Servers\azuredeploy-front-stage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-stage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-prod.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />

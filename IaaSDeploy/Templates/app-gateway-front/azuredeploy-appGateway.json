@@ -1,0 +1,187 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "skuName": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_Small",
+        "Standard_Medium",
+        "Standard_Large"
+      ],
+      "defaultValue": "Standard_Medium",
+      "metadata": {
+        "description": "Sku Name"
+      }
+    },
+    "capacity": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of instances"
+      }
+    },
+    "certData": {
+      "type": "string",
+      "metadata": {
+        "description": "Base-64 encoded form of the .pfx file"
+      }
+    },
+    "certPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for .pfx certificate"
+      }
+    },
+    "backEndSubnetName": {
+      "type": "string",
+      "defaultValue": "BackEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
+      }
+    },
+     "vnetName": {
+      "type": "string",
+      "defaultValue": "TestVNet",
+      "metadata": {
+        "description": "Name for the new VNet."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "gatewayPip": "gatePIP",
+    "webVMSettings": {
+      "vmName": "WEB",
+      "nicName": "NICWEB"
+    },
+     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "applicationGatewayName": "agfront",
+    "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
+    "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways',variables('applicationGatewayName'))]",
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[variables('applicationGatewayName')]",
+      "type": "Microsoft.Network/applicationGateways",
+
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 0)]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 1)]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName, 1)]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPip'))]"
+      ],
+      "tags": {
+        "displayName": "Application Gateway - Web"
+      },
+      "properties": {
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "Standard",
+          "capacity": "[parameters('capacity')]"
+        },
+        "sslCertificates": [
+          {
+            "name": "appGatewaySslCert",
+            "properties": {
+              "data": "[parameters('certData')]",
+              "password": "[parameters('certPassword')]"
+            }
+          }
+        ],
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('backEndSubnetRef')]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGatewayFrontendIP",
+            "properties": {
+              "PublicIPAddress": {
+                "id": "[variables('publicIPRef')]"
+              }
+            }
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": 443
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": [
+                {
+                  "IpAddress": "[reference(concat(variables('webVMSettings').nicName, 0)).ipConfigurations[0].properties.privateIPAddress]"
+                },
+                {
+                  "IpAddress": "[reference(concat(variables('webVMSettings').nicName, 1)).ipConfigurations[0].properties.privateIPAddress]"
+                }
+              ]
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "appGatewayBackendHttpSettings",
+            "properties": {
+              "Port": 80,
+              "Protocol": "Http",
+              "CookieBasedAffinity": "Disabled"
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "appGatewayHttpListener",
+            "properties": {
+              "FrontendIPConfiguration": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/appGatewayFrontendIP')]"
+              },
+              "FrontendPort": {
+                "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
+              },
+              "Protocol": "Https",
+              "SslCertificate": {
+                "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/appGatewaySslCert')]"
+              }
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "Basic",
+              "httpListener": {
+                "id": "[concat(variables('applicationGatewayID'), '/httpListeners/appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendAddressPools/appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(variables('applicationGatewayID'), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+    "outputs": {
+    }
+}

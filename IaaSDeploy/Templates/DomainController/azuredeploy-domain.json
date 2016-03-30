@@ -33,7 +33,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "mgmtVMSettings": {
+    "domainVMSettings": {
       "vmSize": "Standard_D1",
       "adminUsername": "adminuser",
       "adminPassword": "adminP@ssw0rd",
@@ -56,7 +56,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[variables('location')]",
-      "name": "[variables('mgmtVMSettings').pipName]",
+      "name": "[variables('domainVMSettings').pipName]",
       "properties": {
         "publicIPAllocationMethod": "dynamic"
       },
@@ -71,9 +71,9 @@
       "tags": {
         "displayName": "NetworkInterfaces - Mgmt"
       },
-      "name": "[concat(variables('mgmtVMSettings').nicName)]",
+      "name": "[concat(variables('domainVMSettings').nicName)]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtVMSettings').pipName)]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('domainVMSettings').pipName)]"
       ],
       "properties": {
         "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('mgmtNSGName'))]"},
@@ -84,7 +84,7 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[concat('10.10.15.250')]",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('mgmtVMSettings').pipName))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('domainVMSettings').pipName))]"
               },
               "subnet": {
                 "id": "[variables('mgmtSubnetRef')]"
@@ -97,7 +97,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('mgmtVMSettings').avsetName]",
+      "name": "[variables('domainVMSettings').avsetName]",
       "location": "[variables('location')]",
       "dependsOn": [ ],
       "tags": {
@@ -106,40 +106,40 @@
     },
     {
       "apiVersion": "2015-06-15",
-      "name": "[variables('mgmtVMSettings').vmName]",
+      "name": "[variables('domainVMSettings').vmName]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[variables('location')]",
 
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtVMSettings').nicName)]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('mgmtVMSettings').avsetName)]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('domainVMSettings').nicName)]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('domainVMSettings').avsetName)]"
       ],
       "tags": {
         "displayName": "VMs - Mgmt"
       },
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('mgmtVMSettings').avsetName)]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('domainVMSettings').avsetName)]"
         },
         "hardwareProfile": {
-          "vmSize": "[variables('mgmtVMSettings').vmSize]"
+          "vmSize": "[variables('domainVMSettings').vmSize]"
         },
         "osProfile": {
-          "computerName": "[variables('mgmtVMSettings').vmName]",
-          "adminUsername": "[variables('mgmtVMSettings').adminUsername]",
-          "adminPassword": "[variables('mgmtVMSettings').adminPassword]"
+          "computerName": "[variables('domainVMSettings').vmName]",
+          "adminUsername": "[variables('domainVMSettings').adminUsername]",
+          "adminPassword": "[variables('domainVMSettings').adminPassword]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('mgmtVMSettings').publisher]",
-            "offer": "[variables('mgmtVMSettings').offer]",
-            "sku": "[variables('mgmtVMSettings').sku]",
-            "version": "[variables('mgmtVMSettings').version]"
+            "publisher": "[variables('domainVMSettings').publisher]",
+            "offer": "[variables('domainVMSettings').offer]",
+            "sku": "[variables('domainVMSettings').sku]",
+            "version": "[variables('domainVMSettings').version]"
           },
           "osDisk": {
-            "name": "[variables('mgmtVMSettings').osdisk]",
+            "name": "[variables('domainVMSettings').osdisk]",
             "vhd": {
-              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('mgmtVMSettings').osdisk,'.vhd')]"
+              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('domainVMSettings').osdisk,'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -148,7 +148,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtVMSettings').nicName))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('domainVMSettings').nicName))]"
             }
           ]
         }
