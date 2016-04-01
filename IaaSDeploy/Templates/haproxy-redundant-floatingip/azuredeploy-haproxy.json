@@ -54,7 +54,7 @@
         "description": "Size of the VM"
       }
     },
-     "stdStorageName": {
+    "stdStorageName": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -332,8 +332,7 @@
       "tags": { "displayName": "HAProxy - Extension" },
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('haproxyVMNamePrefix'), copyindex())]",
-        "appVMExtensionsLoop"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('haproxyVMNamePrefix'), copyindex())]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",

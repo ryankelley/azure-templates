@@ -41,6 +41,11 @@
     <None Include="Templates\DomainController\azuredeploy-domain.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front-stage.parameters.json" />
+    <None Include="Templates\haproxy-redundant-floatingip\azuredeploy-haproxy-stage.parameters.json" />
+    <None Include="Templates\haproxy-redundant-floatingip\azuredeploy-haproxy.json" />
+    <None Include="Templates\haproxy-redundant-floatingip\haproxyvm-configure.sh" />
+    <None Include="Templates\haproxy-redundant-floatingip\keepalived-action.sh" />
+    <None Include="Templates\haproxy-redundant-floatingip\keepalived-check-appsvc.sh" />
     <None Include="Templates\IaaS-Nat\azuredeploy-stage.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-prod.parameters.json" />
     <None Include="Templates\IaaS-Nat\azuredeploy-storage.json" />
