@@ -246,37 +246,6 @@
     },
     {
       "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/joindomain')]",
-      "location": "[resourceGroup().location]",
-       "tags": {
-        "displayName": "Join Domain - Web"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('webVMSettings').vmName,copyindex(1)))]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "JsonADDomainExtension",
-        "typeHandlerVersion": "1.0",
-        "settings": {
-          "Name": "[parameters('domainToJoin')]",
-          "OUPath": "[parameters('ouPath')]",
-          "User": "kno2testdomain.local\\knodmin",
-          "Restart": "true",
-          "Options": "[parameters('domainJoinOptions')]"
-        },
-        "protectedsettings": {
-          "Password": "[parameters('domainPassword')]"
-        }
-      },
-      "copy": {
-        "name": "webvmcount",
-        "count": "[parameters('webCount')]"
-      },
-    },
-    {
-      "apiVersion": "2015-06-15",
       "name": "[variables('applicationGatewayName')]",
       "type": "Microsoft.Network/applicationGateways",
 
