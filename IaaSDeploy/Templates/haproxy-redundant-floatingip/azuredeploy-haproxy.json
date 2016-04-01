@@ -30,7 +30,7 @@
     },
     "appVMNamePrefix": {
       "type": "string",
-      "defaultValue": "web-",
+      "defaultValue": "Web",
       "metadata": {
         "description": "Prefix to use for names of application VMs"
       }
@@ -61,6 +61,13 @@
         "description": "Name for simple storage account."
       }
     },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "TestVNet",
+      "metadata": {
+        "description": "Name for the new VNet."
+      }
+    }
   },
   "variables": {
     "scriptsBaseUrl": "https://raw.githubusercontent.com/ryankelley/azure-templates/master/IaaSDeploy/Templates/haproxy-redundant-floatingip/",
@@ -74,25 +81,22 @@
         "[concat(variables('scriptsBaseUrl'), 'keepalived-action.sh')]",
         "[concat(variables('scriptsBaseUrl'), 'keepalived-check-appsvc.sh')]"
       ],
-      "commandToExecute": "[concat('sudo bash -x haproxyvm-configure.sh ', ' -a ', parameters('appVMNamePrefix'), '0 -a ', parameters('appVMNamePrefix'), '1 -p ', variables('appVMPort'), ' -l ', parameters('lbDNSLabelPrefix'), '.', variables('location'), '.cloudapp.azure.com -t ', variables('lbVIPPort'), ' -m ', parameters('haproxyVMNamePrefix'), '0 -b ', parameters('haproxyVMNamePrefix'), '1')]"
+      "commandToExecute": "[concat('sudo bash -x haproxyvm-configure.sh ', ' -a ', parameters('appVMNamePrefix'), '1 -a ', parameters('appVMNamePrefix'), '2 -p ', variables('appVMPort'), ' -l ', parameters('lbDNSLabelPrefix'), '.', variables('location'), '.cloudapp.azure.com -t ', variables('lbVIPPort'), ' -m ', parameters('haproxyVMNamePrefix'), '0 -b ', parameters('haproxyVMNamePrefix'), '1')]"
     },
     "appVMPort": 80,
 
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-    "nicNamePrefix": "nic-",
+    "nicNamePrefix": "nic",
 
     "storageAccountType": "Standard_LRS",
     "haproxyAvailabilitySetName": "haproxyAvSet",
     "appAvailabilitySetName": "appAvSet",
 
-    "vnetName": "haproxyVNet",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
-    "addressPrefix": "10.0.0.0/16",
-    "subnetName": "Subnet-1",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables ('subnetName'))]",
-    "subnetPrefix": "10.0.0.0/24",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnetName": "FrontEnd",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
 
     "lbName": "haproxyLB",
     "lbPublicIPAddressType": "Static",
@@ -224,7 +228,6 @@
         "count": "[variables('numberOfHAproxyInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
       ],
       "properties": {
@@ -264,7 +267,6 @@
       },
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('stdStorageName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('haproxyVMNamePrefix'), variables('nicNamePrefix'), copyindex())]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('haproxyAvailabilitySetName'))]"
       ],
