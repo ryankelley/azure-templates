@@ -387,10 +387,17 @@
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNSGName'))]"
               },
               "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('mgmtRouteTableName'))]"
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('mgmtRouteTableName'))]"
               }
             }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "10.10.0.0/24"
+            }
           }
+
         ]
       }
     }
