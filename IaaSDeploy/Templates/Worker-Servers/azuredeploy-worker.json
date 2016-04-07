@@ -1,0 +1,268 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "wrkCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of Web VMs to be deployed to the Front subnet."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "TestVNet",
+      "metadata": {
+        "description": "Name for the new VNet."
+      }
+    },
+    "stdStorageName": {
+      "type": "string",
+      "defaultValue": "rkvnetstrgstd",
+      "metadata": {
+        "description": "Name for simple storage account."
+      }
+    },
+    "frontEndSubnetName": {
+      "type": "string",
+      "defaultValue": "FrontEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
+      }
+    },
+    "frontEndNSGName": {
+      "type": "string",
+      "defaultValue": "NSG-FrontEnd",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
+      }
+    },
+    "backEndSubnetName": {
+      "type": "string",
+      "defaultValue": "BackEnd",
+      "metadata": {
+        "description": "Name for the front end subnet."
+      }
+    },
+    "backEndNSGName": {
+      "type": "string",
+      "defaultValue": "NSG-BackEnd",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_Small",
+        "Standard_Medium",
+        "Standard_Large"
+      ],
+      "defaultValue": "Standard_Medium",
+      "metadata": {
+        "description": "Sku Name"
+      }
+    },
+    "capacity": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of instances"
+      }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the AD domain"
+      }
+    },
+    "domainUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username of the account on the domain"
+      }
+    },
+    "domainPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password of the account on the domain"
+      }
+    },
+    "ouPath": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies an organizational unit (OU) for the domain account. Enter the full distinguished name of the OU in quotation marks. Example: 'OU=testOU; DC=domain; DC=Domain; DC=com'"
+      }
+    },
+    "domainJoinOptions": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "apiVersion": "2015-06-15",
+    "workVMSettings": {
+      "vmSize": "Standard_D1",
+      "adminUsername": "adminuser",
+      "adminPassword": "adminP@ssw0rd",
+      "publisher": "MicrosoftWindowsServer",
+      "offer": "WindowsServer",
+      "sku": "2012-R2-Datacenter",
+      "version": "latest",
+      "vmName": "WRK",
+      "osdisk": "osdiskwrk",
+      "nicName": "NICWRK",
+      "avsetName": "ASWEB"
+    },
+    "vmStorageAccountContainerName": "vhds",
+    "loadPip": "[concat(variables('lbname'), '-publicip')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
+    "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]",
+    "lbname": "kno2lbtest",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbname'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterfaces - Wrk"
+      },
+      "name": "[concat(variables('workVMSettings').nicName, copyindex(1))]",
+      "properties": {
+        "dnsSettings": {
+          "dnsServers": [ "10.10.15.250", "8.8.8.8" ]
+        },
+        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]" },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('frontEndSubnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/WorkPool')]"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "copy": {
+        "name": "webniccount",
+        "count": "[parameters('wrkCount')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[concat(variables('workVMSettings').vmName,copyindex(1))]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('wrkCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('workVMSettings').nicName, copyindex(1))]"
+      ],
+      "tags": {
+        "displayName": "VMs - Work"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('workVMSettings').avsetName)]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('workVMSettings').vmSize]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('workVMSettings').vmName,copyindex(1))]",
+          "adminUsername": "[variables('workVMSettings').adminUsername]",
+          "adminPassword": "[variables('workVMSettings').adminPassword]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('workVMSettings').publisher]",
+            "offer": "[variables('workVMSettings').offer]",
+            "sku": "[variables('workVMSettings').sku]",
+            "version": "[variables('workVMSettings').version]"
+          },
+          "osDisk": {
+            "name": "[concat(variables('workVMSettings').osdisk,copyindex(1))]",
+            "vhd": {
+              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('workVMSettings').osdisk, copyindex(1),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('workVMSettings').nicName,copyindex(1)))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('stdStorageName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('workVMSettings').vmName,copyindex(1),'/joindomain')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('workVMSettings').vmName,copyindex(1)))]"
+      ],
+      "tags": {
+        "displayName": "JoinDomain"
+      },
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "JsonADDomainExtension",
+        "typeHandlerVersion": "1.0",
+        "settings": {
+          "Name": "",
+          "OUPath": "",
+          "User": "",
+          "Restart": "true",
+          "Options": "3"
+        },
+        "protectedsettings": {
+          "Password": ""
+        }
+      },
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('wrkCount')]"
+      }
+    }
+
+  ],
+  "outputs": {
+    "nicname1": {
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('workVMSettings').nicName, 1)]",
+      "type": "string"
+    },
+    "nicname2": {
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('workVMSettings').nicName, 2)]",
+      "type": "string"
+    }
+  }
+}

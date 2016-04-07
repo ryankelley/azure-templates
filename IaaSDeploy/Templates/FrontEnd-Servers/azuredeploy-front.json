@@ -113,6 +113,19 @@
       "metadata": {
         "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
       }
+    },
+    "modulesUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "URL for the DSC configuration module. NOTE: Can be a Github url(raw) to the zip file"
+      }
+    },
+    "configurationFunction": {
+      "type": "string",
+      "defaultValue": "IISSetup.ps1\\IISWebsite",
+      "metadata": {
+        "description": "DSC configuration function to call"
+      }
     }
   },
   "variables": {
@@ -138,14 +151,17 @@
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]",
     "lbname": "kno2lbtest",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbname'))]",
     "lbSettings": {
       "lbPublicIPAddressType": "Static",
       "lbVIPPort": 80,
       "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/BackendPool1')]",
       "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
-      "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]"
-    },
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbname'))]"
+      "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
+      "lbWorkPoolID": "[concat(variables('lbID'),'/backendAddressPools/WorkPool')]",
+      "lbWorkProbeID": "[concat(variables('lbID'),'/probes/wrkProbe')]",
+      "lbWorkVIPPort": 50001
+    }
   },
   "resources": [
     {
@@ -172,6 +188,9 @@
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
       ],
       "properties": {
+        "dnsSettings": {
+          "dnsServers": [ "10.10.15.250", "8.8.8.8" ]
+        },
         "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('frontEndNSGName'))]" },
         "ipConfigurations": [
           {
@@ -281,6 +300,9 @@
         "backendAddressPools": [
           {
             "name": "BackendPool1"
+          },
+          {
+            "name": "WorkPool"
           }
         ],
         "loadBalancingRules": [
@@ -302,6 +324,25 @@
                 "id": "[variables('lbSettings').lbProbeID]"
               }
             }
+          },
+          {
+            "name": "WorkRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbSettings').frontEndIPConfigID]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbSettings').lbWorkPoolID]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('lbSettings').lbWorkVIPPort]",
+              "backendPort": "[variables('lbSettings').lbWorkVIPPort]",
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "probe": {
+                "id": "[variables('lbSettings').lbWorkProbeID]"
+              }
+            }
           }
         ],
         "probes": [
@@ -313,8 +354,70 @@
               "intervalInSeconds": "5",
               "numberOfProbes": "2"
             }
+          },
+          {
+            "name": "wrkProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 80,
+              "intervalInSeconds": "60",
+              "numberOfProbes": "5"
+            }
           }
         ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/joindomain')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('webVMSettings').vmName,copyindex(1)))]"
+      ],
+      "tags": {
+        "displayName": "JoinDomain"
+      },
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "JsonADDomainExtension",
+        "typeHandlerVersion": "1.0",
+        "settings": {
+          "Name": "[parameters('domainToJoin')]",
+          "OUPath": "",
+          "User": "[parameters('domainUsername')]",
+          "Restart": "true",
+          "Options": "3"
+        },
+        "protectedsettings": {
+          "Password": "[parameters('domainPassword')]"
+        }
+      },
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('webCount')]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/setupiis')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.8",
+        "settings": {
+          "ModulesUrl": "[parameters('modulesUrl')]",
+          "ConfigurationFunction": "[parameters('configurationFunction')]",
+          "Properties": {
+            "MachineName": "[concat(variables('webVMSettings').vmName,copyindex(1))]"
+          }
+        },
+        "protectedSettings": null
       }
     }
 

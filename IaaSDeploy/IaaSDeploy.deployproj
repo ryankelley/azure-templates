@@ -62,6 +62,8 @@
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-prod.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />
     <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
+    <None Include="Templates\Worker-Servers\azuredeploy-worker-stage.parameters.json" />
+    <None Include="Templates\Worker-Servers\azuredeploy-worker.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
