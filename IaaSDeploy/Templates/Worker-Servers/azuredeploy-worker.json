@@ -238,14 +238,14 @@
         "type": "JsonADDomainExtension",
         "typeHandlerVersion": "1.0",
         "settings": {
-          "Name": "",
+          "Name": "[parameters('domainToJoin')]",
           "OUPath": "",
-          "User": "",
+          "User": "[parameters('domainUsername')]",
           "Restart": "true",
           "Options": "3"
         },
         "protectedsettings": {
-          "Password": ""
+          "Password": "[parameters('domainPassword')]"
         }
       },
       "copy": {
