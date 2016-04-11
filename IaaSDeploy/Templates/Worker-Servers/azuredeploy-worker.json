@@ -101,6 +101,20 @@
       "metadata": {
         "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
       }
+    },
+     "loadBalancerName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name for the Load Balancer."
+      }
+    },
+    "loadBalancerPublicIPName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Load Balancer Public IP."
+      }
     }
   },
   "variables": {
@@ -120,13 +134,11 @@
       "avsetName": "ASWEB"
     },
     "vmStorageAccountContainerName": "vhds",
-    "loadPip": "[concat(variables('lbname'), '-publicip')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
-    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]",
-    "lbname": "kno2lbtest",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbname'))]"
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]"
   },
   "resources": [
     {
@@ -153,6 +165,11 @@
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(variables('lbID'), '/backendAddressPools/WorkPool')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/octo-natvm', copyindex(3))]"
                 }
               ]
             }
@@ -251,6 +268,24 @@
       "copy": {
         "name": "webvmcount",
         "count": "[parameters('wrkCount')]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('workVMSettings').vmName,copyindex(1),'/CustomScriptExtension')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('workVMSettings').vmName,copyindex(1))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.2",
+        "settings": {
+          "fileUris": [ "[parameters('scriptFile')]" ],
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',parameters('scriptName'))]"
+        }
       }
     }
 

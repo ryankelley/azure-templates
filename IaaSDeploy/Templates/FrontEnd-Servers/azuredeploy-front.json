@@ -126,6 +126,41 @@
       "metadata": {
         "description": "DSC configuration function to call"
       }
+    },
+    "loadBalancerName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name for the Load Balancer."
+      }
+    },
+    "loadBalancerPublicIPName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Load Balancer Public IP."
+      }
+    },
+    "loadBalancerPublicIP": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Load Balancer Public IP."
+      }
+    },
+    "octoRole": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Octopus Deploy Role."
+      }
+    },
+    "octoEnvironment": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Octopus Deploy Environment Name"
+      }
     }
   },
   "variables": {
@@ -144,38 +179,22 @@
       "nicName": "NICWEB",
       "avsetName": "ASWEB"
     },
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
+    "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
+    "VMScripts": {
+      "fileUris": [
+        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
+      ],
+      "commandToExecute": "[concat('./octoInstall.ps1 ', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
+    },
     "vmStorageAccountContainerName": "vhds",
-    "loadPip": "[concat(variables('lbname'), '-publicip')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
-    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]",
-    "lbname": "kno2lbtest",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbname'))]",
-    "lbSettings": {
-      "lbPublicIPAddressType": "Static",
-      "lbVIPPort": 80,
-      "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/BackendPool1')]",
-      "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
-      "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
-      "lbWorkPoolID": "[concat(variables('lbID'),'/backendAddressPools/WorkPool')]",
-      "lbWorkProbeID": "[concat(variables('lbID'),'/probes/wrkProbe')]",
-      "lbWorkVIPPort": 50001
-    }
+
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]"
   },
   "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[variables('location')]",
-      "name": "[variables('loadPip')]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('lbSettings').lbPublicIPAddressType]"
-      },
-      "tags": {
-        "displayName": "PublicIPAddresses - LB"
-      }
-    },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
@@ -185,7 +204,6 @@
       },
       "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
       ],
       "properties": {
         "dnsSettings": {
@@ -203,6 +221,11 @@
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/octo-natvm', copyindex())]"
                 }
               ]
             }
@@ -277,96 +300,7 @@
         }
       }
     },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "name": "[variables('lbname')]",
-      "tags": { "displayName": "Load Balancer" },
-      "type": "Microsoft.Network/loadBalancers",
-      "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('loadPip'))]"
-      ],
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "LoadBalancerFrontEnd",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "BackendPool1"
-          },
-          {
-            "name": "WorkPool"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "LBRule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('lbSettings').frontEndIPConfigID]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('lbSettings').lbPoolID]"
-              },
-              "protocol": "tcp",
-              "frontendPort": "[variables('lbSettings').lbVIPPort]",
-              "backendPort": "[variables('lbSettings').lbVIPPort]",
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 5,
-              "probe": {
-                "id": "[variables('lbSettings').lbProbeID]"
-              }
-            }
-          },
-          {
-            "name": "WorkRule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('lbSettings').frontEndIPConfigID]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('lbSettings').lbWorkPoolID]"
-              },
-              "protocol": "tcp",
-              "frontendPort": "[variables('lbSettings').lbWorkVIPPort]",
-              "backendPort": "[variables('lbSettings').lbWorkVIPPort]",
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 5,
-              "probe": {
-                "id": "[variables('lbSettings').lbWorkProbeID]"
-              }
-            }
-          }
-        ],
-        "probes": [
-          {
-            "name": "tcpProbe",
-            "properties": {
-              "protocol": "tcp",
-              "port": 80,
-              "intervalInSeconds": "5",
-              "numberOfProbes": "2"
-            }
-          },
-          {
-            "name": "wrkProbe",
-            "properties": {
-              "protocol": "Tcp",
-              "port": 80,
-              "intervalInSeconds": "60",
-              "numberOfProbes": "5"
-            }
-          }
-        ]
-      }
-    },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -406,7 +340,7 @@
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]"
       ],
-      "tags": {"displayName": "Setup IIS"},
+      "tags": { "displayName": "Setup IIS" },
       "properties": {
         "publisher": "Microsoft.Powershell",
         "type": "DSC",
@@ -419,6 +353,29 @@
           }
         },
         "protectedSettings": null
+      },
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('webCount')]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/CustomScriptExtension')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]"
+      ],
+      "tags": {"displayName": "Octo Setup Script"},
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.2",
+        "settings": {
+          "fileUris": [ "[variables('VMScripts').fileUris]" ],
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ', '1093', copyIndex(3))]"
+        }
       },
       "copy": {
         "name": "webvmcount",

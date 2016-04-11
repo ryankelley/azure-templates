@@ -26,6 +26,7 @@
   <!-- vertag<:>end -->
   <ItemGroup>
     <Folder Include="Scripts\" />
+    <Folder Include="Templates\NewFolder\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -33,6 +34,7 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="PsScripts\octoInstall.ps1" />
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway.json" />
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway-stage.parameters.json" />
     <None Include="Templates\app-gateway-ssl-offload-sample\azuredeploy-ag-ssl.json" />
@@ -58,6 +60,8 @@
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-stage.parameters.json" />
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-prod.parameters.json" />
     <None Include="Templates\loadbalancer-natrules\azuredeploy-lb-natrules.json" />
+    <None Include="Templates\loadbalancer\azuredeploy-loadbalancer.json" />
+    <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-stage.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-stage.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-prod.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />

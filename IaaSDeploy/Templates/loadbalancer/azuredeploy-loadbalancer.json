@@ -1,0 +1,217 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+     "lbname": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name for the Load Balancer."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "apiVersion": "2015-06-15",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('lbname'))]",
+    "loadPip": "[concat(parameters('lbname'), '-publicip')]",
+    "lbSettings": {
+      "lbPublicIPAddressType": "Static",
+      "lbVIPPort": 80,
+      "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/BackendPool1')]",
+      "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
+      "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
+      "lbWorkPoolID": "[concat(variables('lbID'),'/backendAddressPools/WorkPool')]",
+      "lbWorkProbeID": "[concat(variables('lbID'),'/probes/wrkProbe')]",
+      "lbWorkVIPPort": 50001
+    },
+     },
+  "resources": [
+     {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('location')]",
+      "name": "[variables('loadPip')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('lbSettings').lbPublicIPAddressType]"
+      },
+      "tags": {
+        "displayName": "PublicIPAddresses - LB"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[parameters('lbname')]",
+      "tags": { "displayName": "Load Balancer" },
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('loadPip'))]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LoadBalancerFrontEnd",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('loadPip'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "BackendPool1"
+          },
+          {
+            "name": "WorkPool"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "LBRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbSettings').frontEndIPConfigID]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbSettings').lbPoolID]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('lbSettings').lbVIPPort]",
+              "backendPort": "[variables('lbSettings').lbVIPPort]",
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "probe": {
+                "id": "[variables('lbSettings').lbProbeID]"
+              }
+            }
+          },
+          {
+            "name": "WorkRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbSettings').frontEndIPConfigID]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbSettings').lbWorkPoolID]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('lbSettings').lbWorkVIPPort]",
+              "backendPort": "[variables('lbSettings').lbWorkVIPPort]",
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "probe": {
+                "id": "[variables('lbSettings').lbWorkProbeID]"
+              }
+            }
+          }
+        ],
+        "inboundNatRules": [
+          {
+            "name": "octo-natvm0",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10933,
+              "backendPort": 10933,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm1",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10934,
+              "backendPort": 10934,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm2",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10935,
+              "backendPort": 10935,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm3",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10936,
+              "backendPort": 10936,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm4",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10937,
+              "backendPort": 10937,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm5",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10938,
+              "backendPort": 10938,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm6",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10939,
+              "backendPort": 10939,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "octo-natvm7",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbSettings').frontEndIPConfigID]" },
+              "protocol": "tcp",
+              "frontendPort": 10940,
+              "backendPort": 10940,
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "tcpProbe",
+            "properties": {
+              "protocol": "tcp",
+              "port": 80,
+              "intervalInSeconds": "5",
+              "numberOfProbes": "2"
+            }
+          },
+          {
+            "name": "wrkProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 80,
+              "intervalInSeconds": "60",
+              "numberOfProbes": "5"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
