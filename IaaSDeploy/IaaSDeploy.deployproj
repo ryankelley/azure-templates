@@ -26,7 +26,6 @@
   <!-- vertag<:>end -->
   <ItemGroup>
     <Folder Include="Scripts\" />
-    <Folder Include="Templates\NewFolder\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +60,7 @@
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-stage.parameters.json" />
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-prod.parameters.json" />
     <None Include="Templates\loadbalancer-natrules\azuredeploy-lb-natrules.json" />
+    <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-stage.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-stage.parameters.json" />
