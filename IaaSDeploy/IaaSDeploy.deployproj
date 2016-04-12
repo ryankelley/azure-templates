@@ -35,6 +35,7 @@
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="PsScripts\octoInstall.ps1" />
+    <None Include="PsScripts\start.ps1" />
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway.json" />
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway-stage.parameters.json" />
     <None Include="Templates\app-gateway-ssl-offload-sample\azuredeploy-ag-ssl.json" />

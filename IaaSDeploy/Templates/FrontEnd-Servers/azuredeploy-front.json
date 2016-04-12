@@ -183,9 +183,10 @@
     "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
     "VMScripts": {
       "fileUris": [
+        "[concat(variables('scriptsBaseUrl'), 'start.ps1')]",
         "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
       ],
-      "commandToExecute": "[concat('./octoInstall.ps1 ', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
+      "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
     },
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
@@ -361,19 +362,19 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/CustomScriptExtension')]",
-      "apiVersion": "2015-05-01-preview",
+      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/confgiureOctoTentacle')]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]"
       ],
-      "tags": {"displayName": "Octo Setup Script"},
+      "tags": { "displayName": "Octo Setup Script" },
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.2",
         "settings": {
-          "fileUris": [ "[variables('VMScripts').fileUris]" ],
+         "fileUris": "[variables('VMScripts').fileUris]",
           "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ', '1093', copyIndex(3))]"
         }
       },

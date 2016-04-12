@@ -115,6 +115,27 @@
       "metadata": {
         "description": "Name of the Load Balancer Public IP."
       }
+    },
+    "loadBalancerPublicIP": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Load Balancer Public IP."
+      }
+    },
+    "octoRole": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Octopus Deploy Role."
+      }
+    },
+    "octoEnvironment": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Octopus Deploy Environment Name"
+      }
     }
   },
   "variables": {
@@ -138,6 +159,14 @@
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
+    "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
+    "VMScripts": {
+      "fileUris": [
+        "[concat(variables('scriptsBaseUrl'), 'start.ps1')]",
+        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
+      ],
+      "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
+    },
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]"
   },
   "resources": [
@@ -272,20 +301,25 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('workVMSettings').vmName,copyindex(1),'/CustomScriptExtension')]",
-      "apiVersion": "2015-05-01-preview",
+      "name": "[concat(variables('workVMSettings').vmName,copyindex(1),'/confgiureOctoTentacle')]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', variables('workVMSettings').vmName,copyindex(1))]"
       ],
+      "tags": { "displayName": "Octo Setup Script" },
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.2",
         "settings": {
-          "fileUris": [ "[parameters('scriptFile')]" ],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',parameters('scriptName'))]"
+         "fileUris": "[variables('VMScripts').fileUris]",
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ', '1093', copyIndex(3))]"
         }
+      },
+      "copy": {
+        "name": "webvmcount",
+        "count": "[parameters('wrkCount')]"
       }
     }
 
