@@ -67,6 +67,9 @@
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-prod.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />
     <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
+    <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-prod.parameters.json" />
+    <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-stage.parameters.json" />
+    <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker-stage.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker.json" />
   </ItemGroup>
