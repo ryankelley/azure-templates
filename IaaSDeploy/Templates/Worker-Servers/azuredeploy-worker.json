@@ -167,7 +167,8 @@
       ],
       "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
     },
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]"
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+    "octoPorts": [ "10937", "10938", "10939", "10940" ]
   },
   "resources": [
     {
@@ -198,7 +199,7 @@
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/octo-natvm', copyindex(3))]"
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/octo-natvm', copyindex(4))]"
                 }
               ]
             }
@@ -295,7 +296,7 @@
         }
       },
       "copy": {
-        "name": "webvmcount",
+        "name": "joinDomainLoop",
         "count": "[parameters('wrkCount')]"
       }
     },
@@ -305,6 +306,7 @@
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
+        "joinDomainLoop",
         "[concat('Microsoft.Compute/virtualMachines/', variables('workVMSettings').vmName,copyindex(1))]"
       ],
       "tags": { "displayName": "Octo Setup Script" },
@@ -313,8 +315,8 @@
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.2",
         "settings": {
-         "fileUris": "[variables('VMScripts').fileUris]",
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ', '1093', copyIndex(3))]"
+          "fileUris": "[variables('VMScripts').fileUris]",
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ',variables('octoPorts')[copyIndex()])]"
         }
       },
       "copy": {
