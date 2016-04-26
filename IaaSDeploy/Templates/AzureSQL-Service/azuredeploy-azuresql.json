@@ -1,0 +1,105 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "devdbserverAdminLogin": {
+            "type": "string",
+            "minLength": 1
+        },
+        "devdbserverAdminLoginPassword": {
+            "type": "securestring"
+        },
+        "SqlDatabaseName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "SqlDatabaseCollation": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "SqlDatabaseEdition": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ]
+        },
+        "SqlDatabaseRequestedServiceObjectiveName": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        }
+            },
+    "variables": {
+        "devdbserverName": "[concat('devdbserver', uniqueString(resourceGroup().id))]",
+    },
+    "resources": [
+        {
+            "name": "[variables('devdbserverName')]",
+            "type": "Microsoft.Sql/servers",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-04-01-preview",
+            "dependsOn": [ ],
+            "tags": {
+                "displayName": "devdbserver"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('devdbserverAdminLogin')]",
+              "administratorLoginPassword": "[parameters('devdbserverAdminLoginPassword')]",
+              "version": "12.0"
+            },
+            "resources": [
+                {
+                    "name": "AllowAllWindowsAzureIps",
+                    "type": "firewallrules",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', variables('devdbserverName'))]"
+                    ],
+                  "properties": {
+                    "startIpAddress": "0.0.0.0",
+                    "endIpAddress": "0.0.0.0"
+
+                  },
+                  
+                },
+                {
+                    "name": "[parameters('SqlDatabaseName')]",
+                    "type": "databases",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[variables('devdbserverName')]"
+                    ],
+                    "tags": {
+                        "displayName": "SqlDatabase"
+                    },
+                    "properties": {
+                        "collation": "[parameters('SqlDatabaseCollation')]",
+                        "edition": "[parameters('SqlDatabaseEdition')]",
+                        "maxSizeBytes": "1073741824",
+                        "requestedServiceObjectiveName": "[parameters('SqlDatabaseRequestedServiceObjectiveName')]"
+                    }
+                }
+            ]
+        },
+        
+    ],
+    "outputs": {
+    }
+}

@@ -195,3 +195,4 @@ UpgradeLog*.htm
 
 *-prod.parameters.json
 *-stage.parameters.json
+*-integration.parameters.json
