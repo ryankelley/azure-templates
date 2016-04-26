@@ -41,6 +41,7 @@
     <None Include="Templates\DomainController\azuredeploy-domain-stage.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain-prod.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain.json" />
+    <None Include="Templates\FrontEnd-Servers\azuredeploy-front-integration.parameters.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front-stage.parameters.json" />
     <None Include="Templates\haproxy-redundant-floatingip\azuredeploy-haproxy-stage.parameters.json" />
@@ -61,6 +62,7 @@
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-prod.parameters.json" />
     <None Include="Templates\loadbalancer-natrules\azuredeploy-lb-natrules.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod.parameters.json" />
+    <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-integration.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-stage.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-stage.parameters.json" />
@@ -70,6 +72,7 @@
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-prod.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-stage.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn.json" />
+    <None Include="Templates\Worker-Servers\azuredeploy-worker-integration.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker-stage.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker.json" />
   </ItemGroup>

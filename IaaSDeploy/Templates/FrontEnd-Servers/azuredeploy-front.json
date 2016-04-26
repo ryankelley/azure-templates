@@ -44,42 +44,16 @@
         "description": "Name for the front end subnet."
       }
     },
-    "backEndNSGName": {
-      "type": "string",
-      "defaultValue": "NSG-BackEnd",
-      "metadata": {
-        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS"
-      }
-    },
-    "skuName": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_Small",
-        "Standard_Medium",
-        "Standard_Large"
-      ],
-      "defaultValue": "Standard_Medium",
-      "metadata": {
-        "description": "Sku Name"
-      }
-    },
-    "capacity": {
-      "type": "int",
-      "defaultValue": 2,
-      "metadata": {
-        "description": "Number of instances"
-      }
-    },
-    "certData": {
+    "vmUser": {
       "type": "string",
       "metadata": {
-        "description": "Base-64 encoded form of the .pfx file"
+        "description": "Username for the account on the VM"
       }
     },
-    "certPassword": {
+    "vmPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Password for .pfx certificate"
+        "description": "Password for the account on the VM"
       }
     },
     "domainToJoin": {
@@ -104,7 +78,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Specifies an organizational unit (OU) for the domain account. Enter the full distinguished name of the OU in quotation marks. Example: 'OU=testOU; DC=domain; DC=Domain; DC=com'"
+        "description": "Specifies an organizational unit (OU) for the domain account. Enter the full distinguished name of the OU in quotation marks. Example: 'OU=testOU; DC=domain; DC=Domain; DC=com"
       }
     },
     "domainJoinOptions": {
@@ -168,22 +142,21 @@
     "apiVersion": "2015-06-15",
     "webVMSettings": {
       "vmSize": "Standard_D1",
-      "adminUsername": "adminuser",
-      "adminPassword": "adminP@ssw0rd",
+      "adminUsername": "[parameters('vmUser')]",
+      "adminPassword": "[parameters('vmPassword')]",
       "publisher": "MicrosoftWindowsServer",
       "offer": "WindowsServer",
       "sku": "2012-R2-Datacenter",
       "version": "latest",
-      "vmName": "WEB",
-      "osdisk": "osdiskweb-c",
-      "nicName": "NICWEB",
-      "avsetName": "ASWEB"
+      "vmName": "K2INT-WEB",
+      "osdisk": "osdiskweb-int",
+      "nicName": "NICINT-WEB",
+      "avsetName": "ASINT-WEB"
     },
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
     "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
     "VMScripts": {
       "fileUris": [
-        "[concat(variables('scriptsBaseUrl'), 'start.ps1')]",
         "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
       ],
       "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
@@ -376,8 +349,8 @@
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.2",
         "settings": {
-         "fileUris": "[variables('VMScripts').fileUris]",
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ', variables('octoPorts')[copyIndex()])]"
+          "fileUris": "[variables('VMScripts').fileUris]",
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('VMScripts').commandToExecute,' -port ',variables('octoPorts')[copyIndex()])]"
         }
       },
       "copy": {

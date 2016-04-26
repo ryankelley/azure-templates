@@ -18,6 +18,7 @@
     "lbSettings": {
       "lbPublicIPAddressType": "Static",
       "lbVIPPort": 80,
+      "lbSSLPort": 443,
       "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/BackendPool1')]",
       "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
       "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
@@ -80,6 +81,25 @@
               "protocol": "tcp",
               "frontendPort": "[variables('lbSettings').lbVIPPort]",
               "backendPort": "[variables('lbSettings').lbVIPPort]",
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "probe": {
+                "id": "[variables('lbSettings').lbProbeID]"
+              }
+            }
+          },
+          {
+            "name": "HttpsRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbSettings').frontEndIPConfigID]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbSettings').lbPoolID]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('lbSettings').lbSSLPort]",
+              "backendPort": "[variables('lbSettings').lbSSLPort]",
               "enableFloatingIP": false,
               "idleTimeoutInMinutes": 5,
               "probe": {
