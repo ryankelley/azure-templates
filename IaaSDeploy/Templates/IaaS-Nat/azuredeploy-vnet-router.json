@@ -197,7 +197,7 @@
               "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "10933-10959",
-              "sourceAddressPrefix": "Any",
+              "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 103,
