@@ -148,7 +148,7 @@
     "location": "[resourceGroup().location]",
     "apiVersion": "2015-06-15",
     "workVMSettings": {
-      "vmSize": "Standard_D1",
+      "vmSize": "Standard_D2",
       "adminUsername": "[parameters('vmUser')]",
       "adminPassword": "[parameters('vmPassword')]",
       "publisher": "MicrosoftWindowsServer",
@@ -169,7 +169,8 @@
     "VMScripts": {
       "fileUris": [
         "[concat(variables('scriptsBaseUrl'), 'start.ps1')]",
-        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
+        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]",
+        "[concat(variables('scriptsBaseUrl'), 'rewrite_amd64.msi')]"
       ],
       "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
     },

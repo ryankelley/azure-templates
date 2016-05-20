@@ -7,7 +7,7 @@
       "metadata": {
         "description": "Route based (Dynamic Gateway) or Policy based (Static Gateway)"
       },
-      "defaultValue": "RouteBased",
+      "defaultValue": "PolicyBased",
       "allowedValues": [
         "RouteBased",
         "PolicyBased"

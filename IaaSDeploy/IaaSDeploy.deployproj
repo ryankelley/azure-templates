@@ -67,9 +67,10 @@
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-integration.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-stage.parameters.json" />
-    <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-stage.parameters.json" />
-    <None Include="Templates\Mgmt-Server\azuredeploy-mgmt-prod.parameters.json" />
-    <None Include="Templates\Mgmt-Server\azuredeploy-mgmt.json" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-hl7server.parameters.json" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-server-mgmt-stage.parameters.json" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-server-mgmt-prod.parameters.json" />
+    <None Include="Templates\Mgmt-Server\azuredeploy-server.json" />
     <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-prod.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-stage.parameters.json" />

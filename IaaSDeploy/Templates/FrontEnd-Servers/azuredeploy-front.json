@@ -135,6 +135,15 @@
       "metadata": {
         "description": "Octopus Deploy Environment Name"
       }
+    },
+    "envprefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "3 character env prefix" },
+      "maxLength": 3
+    }, "diskName": {
+      "type": "string",
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -148,16 +157,17 @@
       "offer": "WindowsServer",
       "sku": "2012-R2-Datacenter",
       "version": "latest",
-      "vmName": "K2INT-WEB",
-      "osdisk": "osdiskweb-int",
-      "nicName": "NICINT-WEB",
-      "avsetName": "ASINT-WEB"
+      "vmName": "[concat('K2',parameters('envprefix'),'-WEB')]",
+      "osdisk": "[parameters('diskName')]",
+      "nicName": "[concat('NIC',parameters('envprefix'),'-WEB')]",
+      "avsetName": "[concat('AS',parameters('envprefix'),'-WEB')]"
     },
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
     "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
     "VMScripts": {
       "fileUris": [
-        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]"
+        "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]",
+        "[concat(variables('scriptsBaseUrl'), 'rewrite_amd64.msi')]"
       ],
       "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
     },
@@ -165,7 +175,7 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
-    "octoPorts": ["10933", "10934", "10935", "10936"],
+    "octoPorts": [ "10933", "10934", "10935", "10936" ],
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]"
   },
   "resources": [

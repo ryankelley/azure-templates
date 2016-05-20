@@ -135,49 +135,6 @@
       },
       "properties": {
         "securityRules": [
-          {
-            "name": "allow-frontend",
-            "properties": {
-              "description": "Allow FE Subnet",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "1433",
-              "sourceAddressPrefix": "[parameters('frontEndSubnetPrefix')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 100,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "rdp-rule",
-            "properties": {
-              "description": "Allow RDP",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "3389",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 200,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "block-internet",
-            "properties": {
-              "description": "Block Internet",
-              "protocol": "*",
-              "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "Internet",
-              "access": "Deny",
-              "priority": 100,
-              "direction": "Outbound"
-            }
-          }
-
         ]
       }
     },
@@ -232,6 +189,20 @@
               "priority": 102,
               "direction": "Inbound"
             }
+          },
+          {
+            "name": "octo",
+            "properties": {
+              "description": "Allow Octopus Traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "10933-10959",
+              "sourceAddressPrefix": "Any",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 103,
+              "direction": "Inbound"
+            }
           }
         ]
       }
@@ -253,7 +224,7 @@
               "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "3389",
-              "sourceAddressPrefix": "Internet",
+              "sourceAddressPrefix": "66.194.79.218/32",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 100,

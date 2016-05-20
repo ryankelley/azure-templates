@@ -233,5 +233,17 @@
     }
   ],
   "outputs": {
+    "publicIpName": {
+      "type": "string",
+      "value": "[variables('loadPip')]"
+    },
+    "name": {
+      "type": "string",
+      "value": "[parameters('lbname')]"
+    },
+    "ipAddress": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('loadPip'))).ipAddress]"
+    }
   }
 }
