@@ -38,6 +38,7 @@
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway.json" />
     <None Include="Templates\app-gateway-front\azuredeploy-appGateway-stage.parameters.json" />
     <None Include="Templates\app-gateway-ssl-offload-sample\azuredeploy-ag-ssl.json" />
+    <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-prod.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-integration.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql.json" />
     <None Include="Templates\DomainController\azuredeploy-domain-stage.parameters.json" />

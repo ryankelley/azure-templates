@@ -35,6 +35,7 @@
                 "S0",
                 "S1",
                 "S2",
+                "S3",
                 "P1",
                 "P2",
                 "P3"
@@ -45,17 +46,17 @@
         }
             },
     "variables": {
-        "devdbserverName": "[concat('devdbserver', uniqueString(resourceGroup().id))]",
+        "dbserverName": "[concat('dbserver', uniqueString(resourceGroup().id))]",
     },
     "resources": [
         {
-            "name": "[variables('devdbserverName')]",
+            "name": "[variables('dbserverName')]",
             "type": "Microsoft.Sql/servers",
             "location": "[resourceGroup().location]",
             "apiVersion": "2014-04-01-preview",
             "dependsOn": [ ],
             "tags": {
-                "displayName": "devdbserver"
+                "displayName": "DB Server"
             },
             "properties": {
                 "administratorLogin": "[parameters('devdbserverAdminLogin')]",
@@ -69,7 +70,7 @@
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2014-04-01-preview",
                     "dependsOn": [
-                        "[concat('Microsoft.Sql/servers/', variables('devdbserverName'))]"
+                        "[concat('Microsoft.Sql/servers/', variables('dbserverName'))]"
                     ],
                   "properties": {
                     "startIpAddress": "0.0.0.0",
@@ -84,7 +85,7 @@
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2014-04-01-preview",
                     "dependsOn": [
-                        "[variables('devdbserverName')]"
+                        "[variables('dbserverName')]"
                     ],
                     "tags": {
                         "displayName": "SqlDatabase"
