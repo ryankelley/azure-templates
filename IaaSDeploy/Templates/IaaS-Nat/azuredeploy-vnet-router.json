@@ -120,6 +120,11 @@
       "metadata": {
         "description": "Name for back end subnet route table."
       }
+    },
+    "allowedRDPIP": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {"description": "IP Address in CIDR format to allow RDP for firewall"}
     }    
   },
   "variables": {
@@ -224,7 +229,7 @@
               "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "3389",
-              "sourceAddressPrefix": "66.194.79.218/32",
+              "sourceAddressPrefix": "[parameters('allowedRDPIP')]",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 100,
