@@ -159,6 +159,11 @@
       "metadata": {
         "description": "Name for back end subnet route table."
       }
+    },
+    "allowedRDPIP": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "IP Address in CIDR format to allow RDP for firewall" }
     }
   },
   "variables": {
@@ -185,7 +190,7 @@
     "frontEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('frontEndSubnetName'))]",
     "backEndSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('backEndSubnetName'))]",
     "dmzSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('dmzSubnetName'))]",
-    "templateBaseUrl": "https://raw.githubusercontent.com/ryankelley/azure-templates/master/IaaSDeploy/Templates/IaaS-Nat/"
+    "templateBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/templates/"
   },
   "resources": [
     {
@@ -231,7 +236,8 @@
           "backEndNSGName": { "value": "[parameters('backEndNSGName')]" },
           "vmaIpAddress": { "value": "[parameters('vmaIpAddress')]" },
           "frontEndRouteTableName": { "value": "[parameters('frontEndRouteTableName')]" },
-          "backEndRouteTableName": { "value": "[parameters('backEndRouteTableName')]" }
+          "backEndRouteTableName": { "value": "[parameters('backEndRouteTableName')]" },
+          "allowedRDPIP": {"value": "[parameters('allowedRDPIP')]"}
         }
       }
     },

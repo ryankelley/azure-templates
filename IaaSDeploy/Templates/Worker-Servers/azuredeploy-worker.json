@@ -142,6 +142,16 @@
       "metadata": {
         "description": "Octopus Deploy Environment Name"
       }
+    },
+    "envprefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "3 character env prefix" },
+      "maxLength": 3
+    },
+    "diskName": {
+      "type": "string",
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -155,10 +165,10 @@
       "offer": "WindowsServer",
       "sku": "2012-R2-Datacenter",
       "version": "latest",
-      "vmName": "K2INT-WRK",
-      "osdisk": "osdiskwrkint",
-      "nicName": "NICINT-WRK",
-      "avsetName": "ASINT-WEB"
+      "vmName": "[concat('K2',parameters('envprefix'),'-WRK')]",
+      "osdisk": "[parameters('diskName')]",
+      "nicName": "[concat('NIC',parameters('envprefix'),'-WRK')]",
+      "avsetName": "[concat('AS',parameters('envprefix'),'-WEB')]"
     },
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",

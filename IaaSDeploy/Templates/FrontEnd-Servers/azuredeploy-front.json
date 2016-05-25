@@ -2,11 +2,11 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "webCount": {
+    "vmCount": {
       "type": "int",
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of Web VMs to be deployed to the Front subnet."
+        "description": "Number of VMs to be deployed to the Front subnet."
       }
     },
     "vnetName": {
@@ -141,26 +141,28 @@
       "defaultValue": "",
       "metadata": { "description": "3 character env prefix" },
       "maxLength": 3
-    }, "diskName": {
+    },
+    "diskName": {
       "type": "string",
       "defaultValue": ""
-    }
+    },
+    "suffix": {"type": "string"}
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "apiVersion": "2015-06-15",
-    "webVMSettings": {
-      "vmSize": "Standard_D1",
+    "VMSettings": {
+      "vmSize": "Standard_D3",
       "adminUsername": "[parameters('vmUser')]",
       "adminPassword": "[parameters('vmPassword')]",
       "publisher": "MicrosoftWindowsServer",
       "offer": "WindowsServer",
       "sku": "2012-R2-Datacenter",
       "version": "latest",
-      "vmName": "[concat('K2',parameters('envprefix'),'-WEB')]",
+      "vmName": "[concat('K2',parameters('envprefix'),'-',parameters('suffix'))]",
       "osdisk": "[parameters('diskName')]",
-      "nicName": "[concat('NIC',parameters('envprefix'),'-WEB')]",
-      "avsetName": "[concat('AS',parameters('envprefix'),'-WEB')]"
+      "nicName": "[concat('NIC',parameters('envprefix'),'-',parameters('suffix'))]",
+      "avsetName": "[concat('AS',parameters('envprefix'),'-',parameters('suffix'))]"
     },
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('loadBalancerPublicIPName'))]",
     "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
@@ -184,9 +186,9 @@
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[variables('location')]",
       "tags": {
-        "displayName": "NetworkInterfaces - Web"
+        "displayName": "[concat('NetworkInterfaces - ', parameters('suffix'))]"
       },
-      "name": "[concat(variables('webVMSettings').nicName, copyindex(1))]",
+      "name": "[concat(variables('VMSettings').nicName, copyindex(1))]",
       "dependsOn": [
       ],
       "properties": {
@@ -218,58 +220,58 @@
       },
       "copy": {
         "name": "webniccount",
-        "count": "[parameters('webCount')]"
+        "count": "[parameters('vmCount')]"
       }
     },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('webVMSettings').avsetName]",
+      "name": "[variables('VMSettings').avsetName]",
       "location": "[variables('location')]",
       "dependsOn": [ ],
       "tags": {
-        "displayName": "AvailabilitySet - Web"
+        "displayName": "[concat('AvailabilitySets - ', parameters('suffix'))]"
       }
     },
     {
       "apiVersion": "2015-06-15",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1))]",
+      "name": "[concat(variables('VMSettings').vmName,copyindex(1))]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[variables('location')]",
       "copy": {
         "name": "webvmcount",
-        "count": "[parameters('webCount')]"
+        "count": "[parameters('vmCount')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, copyindex(1))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('webVMSettings').avsetName)]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('VMSettings').nicName, copyindex(1))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('VMSettings').avsetName)]"
       ],
       "tags": {
-        "displayName": "VMs - Web"
+        "displayName": "[concat('VMs - ', parameters('suffix'))]"
       },
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('webVMSettings').avsetName)]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('VMSettings').avsetName)]"
         },
         "hardwareProfile": {
-          "vmSize": "[variables('webVMSettings').vmSize]"
+          "vmSize": "[variables('VMSettings').vmSize]"
         },
         "osProfile": {
-          "computerName": "[concat(variables('webVMSettings').vmName,copyindex(1))]",
-          "adminUsername": "[variables('webVMSettings').adminUsername]",
-          "adminPassword": "[variables('webVMSettings').adminPassword]"
+          "computerName": "[concat(variables('VMSettings').vmName,copyindex(1))]",
+          "adminUsername": "[variables('VMSettings').adminUsername]",
+          "adminPassword": "[variables('VMSettings').adminPassword]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('webVMSettings').publisher]",
-            "offer": "[variables('webVMSettings').offer]",
-            "sku": "[variables('webVMSettings').sku]",
-            "version": "[variables('webVMSettings').version]"
+            "publisher": "[variables('VMSettings').publisher]",
+            "offer": "[variables('VMSettings').offer]",
+            "sku": "[variables('VMSettings').sku]",
+            "version": "[variables('VMSettings').version]"
           },
           "osDisk": {
-            "name": "[concat(variables('webVMSettings').osdisk,copyindex(1))]",
+            "name": "[concat(variables('VMSettings').osdisk,copyindex(1))]",
             "vhd": {
-              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('webVMSettings').osdisk, copyindex(1),'.vhd')]"
+              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('VMSettings').osdisk, copyindex(1),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -278,7 +280,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('webVMSettings').nicName,copyindex(1)))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('VMSettings').nicName,copyindex(1)))]"
             }
           ]
         }
@@ -288,10 +290,10 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/joindomain')]",
+      "name": "[concat(variables('VMSettings').vmName,copyindex(1),'/joindomain')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('webVMSettings').vmName,copyindex(1)))]"
+        "[concat('Microsoft.Compute/virtualMachines/', concat(variables('VMSettings').vmName,copyindex(1)))]"
       ],
       "tags": {
         "displayName": "JoinDomain"
@@ -313,17 +315,17 @@
       },
       "copy": {
         "name": "joinDomainLoop",
-        "count": "[parameters('webCount')]"
+        "count": "[parameters('vmCount')]"
       }
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/setupiis')]",
+      "name": "[concat(variables('VMSettings').vmName,copyindex(1),'/setupiis')]",
       "apiVersion": "2015-05-01-preview",
       "location": "[variables('location')]",
       "dependsOn": [
         "joinDomainLoop",
-        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('VMSettings').vmName,copyindex(1))]",
       ],
       "tags": { "displayName": "Setup IIS" },
       "properties": {
@@ -334,24 +336,24 @@
           "ModulesUrl": "[parameters('modulesUrl')]",
           "ConfigurationFunction": "[parameters('configurationFunction')]",
           "Properties": {
-            "MachineName": "[concat(variables('webVMSettings').vmName,copyindex(1))]"
+            "MachineName": "[concat(variables('VMSettings').vmName,copyindex(1))]"
           }
         },
         "protectedSettings": null
       },
       "copy": {
         "name": "setupIISLoop",
-        "count": "[parameters('webCount')]"
+        "count": "[parameters('vmCount')]"
       }
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('webVMSettings').vmName,copyindex(1),'/confgiureOctoTentacle')]",
+      "name": "[concat(variables('VMSettings').vmName,copyindex(1),'/confgiureOctoTentacle')]",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "setupIISLoop",
-        "[concat('Microsoft.Compute/virtualMachines/', variables('webVMSettings').vmName,copyindex(1))]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('VMSettings').vmName,copyindex(1))]",
       ],
       "tags": { "displayName": "Octo Setup Script" },
       "properties": {
@@ -365,18 +367,18 @@
       },
       "copy": {
         "name": "webvmcount",
-        "count": "[parameters('webCount')]"
+        "count": "[parameters('vmCount')]"
       }
     }
 
   ],
   "outputs": {
     "nicname1": {
-      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 1)]",
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('VMSettings').nicName, 1)]",
       "type": "string"
     },
     "nicname2": {
-      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('webVMSettings').nicName, 2)]",
+      "value": "[concat('Microsoft.Network/networkInterfaces/', variables('VMSettings').nicName, 2)]",
       "type": "string"
     }
   }
