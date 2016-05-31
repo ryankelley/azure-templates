@@ -189,7 +189,7 @@
         "subnet2Ref": "[concat(variables('vnetID'),'/subnets/', parameters('Subnet2Name'))]",
         "nsgname": "[concat(parameters('vmName'),'-SSH-SecurityGroup')]",
         "apiVer": "2015-06-15",
-        "publicIPAddressType": "Dynamic",
+        "publicIPAddressType": "Static",
         "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
         "storageAccountSetupURL": "[concat(parameters('baseUrl'),'/storageAccount-',parameters('storageAccountNewOrExisting'),'.json')]",
         "publicIPSetupURL": "[concat(parameters('baseUrl'),'/publicip-',parameters('publicIPNewOrExisting'),'.json')]",
@@ -366,7 +366,7 @@
               "properties": {
                 "privateIPAllocationMethod": "Dynamic",
                 "subnet": {
-                  "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork','2015-01-01').outputs.subnet1Ref.value]"
+                  "id": "[variables('subnet1Ref')]"
                 },
                 "networkSecurityGroup": {
                   "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname'))]"
@@ -392,7 +392,7 @@
                 "privateIPAllocationMethod": "Static",
                 "privateIPAddress": "[parameters('subnet1StartAddress')]",
                 "subnet": {
-                  "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork','2015-01-01').outputs.subnet2Ref.value]"
+                  "id": "[variables('subnet2Ref')]"
                 }
               }
             }

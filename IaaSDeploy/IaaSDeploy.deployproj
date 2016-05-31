@@ -41,6 +41,15 @@
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-prod.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-integration.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql.json" />
+    <None Include="Templates\cisco-csr-1000v\azuredeploy-csr1000v.json" />
+    <None Include="Templates\cisco-csr-1000v\azuredeploy.parameters.allnew.json" />
+    <None Include="Templates\cisco-csr-1000v\azuredeploy-azuredeploy-csr1000v-stage.parameters.json" />
+    <None Include="Templates\cisco-csr-1000v\publicip-existing.json" />
+    <None Include="Templates\cisco-csr-1000v\publicip-new.json" />
+    <None Include="Templates\cisco-csr-1000v\storageAccount-existing.json" />
+    <None Include="Templates\cisco-csr-1000v\storageAccount-new.json" />
+    <None Include="Templates\cisco-csr-1000v\vnet-existing.json" />
+    <None Include="Templates\cisco-csr-1000v\vnet-new.json" />
     <None Include="Templates\DomainController\azuredeploy-domain-stage.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain-prod.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain.json" />
@@ -62,10 +71,6 @@
     <None Include="Templates\IaaS-Nat\azuredeploy.parameters.json" />
     <None Include="Templates\IaaS-Nat\metadata.json" />
     <None Include="Templates\IaaS-Nat\README.md" />
-    <None Include="Templates\loadbalancer-lbrules\azuredeploy-lb-lbrules.json" />
-    <None Include="Templates\loadbalancer-lbrules\lb-lbrules-stage.parameters.json" />
-    <None Include="Templates\loadbalancer-lbrules\lb-lbrules-prod.parameters.json" />
-    <None Include="Templates\loadbalancer-natrules\azuredeploy-lb-natrules.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod-regsite.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod-converter.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod.parameters.json" />
@@ -76,7 +81,6 @@
     <None Include="Templates\Mgmt-Server\azuredeploy-server-mgmt-stage.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-server-mgmt-prod.parameters.json" />
     <None Include="Templates\Mgmt-Server\azuredeploy-server.json" />
-    <None Include="Templates\SQL-Servers\azuredeploy-sql.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-prod.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-stage.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn.json" />
