@@ -258,9 +258,6 @@
                     "publicIPAddressType": {
                         "value": "[variables('publicIPAddressType')]"
                     },
-                    "publicIPNewOrExisting": {
-                        "value": "[parameters('publicIPNewOrExisting')]"
-                    },
                     "dnsPrefix": {
                         "value": "[parameters('publicIPDnsName')]"
                     },
