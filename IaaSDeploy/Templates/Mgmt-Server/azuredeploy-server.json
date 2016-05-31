@@ -1,0 +1,180 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "VNetName",
+      "metadata": {
+        "description": "Name for the new VNet."
+      }
+    },
+    "stdStorageName": {
+      "type": "string",
+      "defaultValue": "StorageAccount",
+      "metadata": {
+        "description": "Name for simple storage account."
+      }
+    },
+    "serverNSGName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name for the NSG used to allow RDP, SQL, and block Internet."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name for the management subnet."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D1",
+      "metadata": {
+        "description": "Size for the management subnet."
+      }
+    },
+    "vmname": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "VMName."
+      }
+    },
+    "vmPassword": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Admin Password."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "mgmtVMSettings": {
+      "vmSize": "[parameters('vmSize')]",
+      "adminUsername": "adminuser",
+      "adminPassword": "[parameters('vmPassword')]",
+      "publisher": "MicrosoftWindowsServer",
+      "offer": "WindowsServer",
+      "sku": "2012-R2-Datacenter",
+      "version": "latest",
+      "vmName": "[parameters('vmname')]",
+      "osdisk": "[concat('osdsk',parameters('vmname'),substring(uniqueString(resourceGroup().id, deployment().name),0,3))]",
+      "nicName": "[concat('nic-',parameters('vmname'),substring(uniqueString(resourceGroup().id, deployment().name),0,3))]",
+      "pipName": "[concat('pip-',parameters('vmname'),substring(uniqueString(resourceGroup().id, deployment().name),0,3))]",
+      "avsetName": "[concat('avs-',parameters('vmname'),substring(uniqueString(resourceGroup().id, deployment().name),0,3))]"
+    },
+    "vmStorageAccountContainerName": "vhds",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "mgmtSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('location')]",
+      "name": "[variables('mgmtVMSettings').pipName]",
+      "properties": {
+        "publicIPAllocationMethod": "dynamic"
+      },
+      "tags": {
+        "displayName": "PublicIPAddresses - Mgmt"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterfaces - Mgmt"
+      },
+      "name": "[concat(variables('mgmtVMSettings').nicName)]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtVMSettings').pipName)]"
+      ],
+      "properties": {
+        "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('serverNSGName'))]"},
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('mgmtVMSettings').pipName))]"
+              },
+              "subnet": {
+                "id": "[variables('mgmtSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('mgmtVMSettings').avsetName]",
+      "location": "[variables('location')]",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "AvailabilitySet - Web"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[variables('mgmtVMSettings').vmName]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtVMSettings').nicName)]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('mgmtVMSettings').avsetName)]"
+      ],
+      "tags": {
+        "displayName": "VM - Mgmt"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('mgmtVMSettings').avsetName)]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('mgmtVMSettings').vmSize]"
+        },
+        "osProfile": {
+          "computerName": "[variables('mgmtVMSettings').vmName]",
+          "adminUsername": "[variables('mgmtVMSettings').adminUsername]",
+          "adminPassword": "[variables('mgmtVMSettings').adminPassword]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('mgmtVMSettings').publisher]",
+            "offer": "[variables('mgmtVMSettings').offer]",
+            "sku": "[variables('mgmtVMSettings').sku]",
+            "version": "[variables('mgmtVMSettings').version]"
+          },
+          "osDisk": {
+            "name": "[variables('mgmtVMSettings').osdisk]",
+            "vhd": {
+              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('mgmtVMSettings').osdisk,'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtVMSettings').nicName))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

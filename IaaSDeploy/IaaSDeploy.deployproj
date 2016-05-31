@@ -66,6 +66,7 @@
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-stage.parameters.json" />
     <None Include="Templates\loadbalancer-lbrules\lb-lbrules-prod.parameters.json" />
     <None Include="Templates\loadbalancer-natrules\azuredeploy-lb-natrules.json" />
+    <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod-regsite.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod-converter.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-prod.parameters.json" />
     <None Include="Templates\loadbalancer\azuredeploy-loadbalancer-integration.parameters.json" />
@@ -80,6 +81,7 @@
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn-stage.parameters.json" />
     <None Include="Templates\VPN-SiteToSite\azuredeploy-vpn.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker-integration.parameters.json" />
+    <None Include="Templates\Worker-Servers\azuredeploy-worker-doc-prod.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker-prod.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker-stage.parameters.json" />
     <None Include="Templates\Worker-Servers\azuredeploy-worker.json" />

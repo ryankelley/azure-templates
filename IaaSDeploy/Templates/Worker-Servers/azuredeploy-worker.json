@@ -152,6 +152,14 @@
     "diskName": {
       "type": "string",
       "defaultValue": ""
+    },
+    "suffix": {
+      "type": "string",
+      "minLength": 1
+    },
+    "availabilitySetName": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "variables": {
@@ -165,10 +173,10 @@
       "offer": "WindowsServer",
       "sku": "2012-R2-Datacenter",
       "version": "latest",
-      "vmName": "[concat('K2',parameters('envprefix'),'-WRK')]",
+      "vmName": "[concat('K2',parameters('envprefix'),'-',parameters('suffix'))]",
       "osdisk": "[parameters('diskName')]",
-      "nicName": "[concat('NIC',parameters('envprefix'),'-WRK')]",
-      "avsetName": "[concat('AS',parameters('envprefix'),'-WEB')]"
+      "nicName": "[concat('NIC',parameters('envprefix'),'-',parameters('suffix'))]",
+      "avsetName": "[parameters('availabilitySetName')]"
     },
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
@@ -178,9 +186,9 @@
     "scriptsBaseUrl": "http://kno2tststrgstd.blob.core.windows.net/psscripts/",
     "VMScripts": {
       "fileUris": [
-        "[concat(variables('scriptsBaseUrl'), 'start.ps1')]",
         "[concat(variables('scriptsBaseUrl'), 'octoInstall.ps1')]",
-        "[concat(variables('scriptsBaseUrl'), 'rewrite_amd64.msi')]"
+        "[concat(variables('scriptsBaseUrl'), 'rewrite_amd64.msi')]",
+        "[concat(variables('scriptsBaseUrl'), 'dotNetFx461_full_x64.exe')]"
       ],
       "commandToExecute": "[concat('octoInstall.ps1', ' -env ', parameters('octoEnvironment'), ' -ip ', parameters('loadBalancerPublicIP') , ' -role ', parameters('octoRole'))]"
     },
@@ -280,7 +288,7 @@
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
-            "enabled": "true",
+            "enabled": "false",
             "storageUri": "[concat('http://',parameters('stdStorageName'),'.blob.core.windows.net')]"
           }
         }
