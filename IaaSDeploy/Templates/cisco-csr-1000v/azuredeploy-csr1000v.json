@@ -1,182 +1,188 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "virtualNetworkName": {
-            "type": "string",
-            "defaultValue": "CSR_Network",
-            "metadata": {
-                "description": "VNet name"
-            }
-        },
-        "virtualNetworkExistingRGName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Identifies whether to use new or existing Storage Account"
-            }
-        },
-        "virtualNetworkAddressPrefix": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Virtual Network Address prefix"
-            }
-        },
-        "vnetNewOrExisting" : {
-            "type" : "string",
-            "defaultValue" : "",
-            "metadata": {
-                "description": "Identifies whether to use new or existing Virtual Network"
-            }
-        },
-        "Subnet1Prefix": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Subnet 1 Prefix"
-            }
-        },
-        "Subnet1Name": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Subnet 1 Name"
-            }
-        },
-        "Subnet2Prefix": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Subnet 2 Prefix"
-            }
-        },
-        "Subnet2Name": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Subnet 2 Name"
-            }
-        },
-        "subnet1StartAddress" : {
-            "type" : "string",
-            "metadata" : {
-                "description" : "Subnet 1 Starting IP Address"
-            }
-        },
-        "adminUsername": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Username for the Virtual Machine."
-            }
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the Virtual Machine."
-            }
-        },
-        "sshPublicKey": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "SSH Key for the virtual machines"
-            }
-        },
-        "authenticationType": {
-            "type": "string",
-            "defaultValue": "password",
-            "allowedValues": [
-                "password",
-                "sshPublicKey"
-            ],
-            "metadata": {
-                "description": "Authentication Type to chose for the Virtual Machines"
-            }
-        },
-        "vmName": {
-            "type": "string",
-            "defaultValue": "CSR",
-            "metadata": {
-                "description": "Name for the Virtual Machine."
-            }
-        },
-        "newStorageAccountName": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique Name for Storage Account where the Virtual Machine's disks will be placed."
-            }
-        },
-        "storageAccountType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS"
-            ],
-            "metadata": {
-                "description": "The type of storage account created."
-            }
-        },
-        "storageAccountNewOrExisting": {
-            "type": "string",
-            "defaultValue": "new",
-            "allowedValues": [
-                "new",
-                "existing"
-            ],
-            "metadata": {
-                "description": "Identifies whether to use new or existing Storage Account"
-            }
-        },
-        "storageAccountExistingRG": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Resource Group containing existing storage account"
-            }
-        },
-        "publicIPAddressName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Name of the Public IP Address"
-            }
-        },
-        "publicIPDnsName": {
-            "type": "string",
-            "defaultValue": "csrdns",
-            "metadata": {
-                "description": "Unique DNS Prefix for the Public IP used to access the Virtual Machine."
-            }
-        },
-        "publicIPNewOrExisting": {
-            "type": "string",
-            "defaultValue": "new",
-            "allowedValues": [
-                "new",
-                "existing"
-            ],
-            "metadata": {
-                "description": "Indicates whether the Public IP is new or existing"
-            }
-        },
-        "publicIPExistingRGName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Resource Group containing existing public IP"
-            }
-        },
-        "baseUrl": {
-            "type": "string",
-            "metadata": {
-                "artifactsBaseUrl": "",
-                "description": "URL to acquire other templates"
-            },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/cisco-csr-1000v"
-        }
+  "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "CSR_Network",
+      "metadata": {
+        "description": "VNet name"
+      }
     },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Identifies whether to use new or existing Storage Account"
+      }
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Virtual Network Address prefix"
+      }
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Identifies whether to use new or existing Virtual Network"
+      }
+    },
+    "Subnet1Prefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 1 Prefix"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 1 Name"
+      }
+    },
+    "Subnet2Prefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 2 Prefix"
+      }
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 2 Name"
+      }
+    },
+    "subnet1StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet 1 Starting IP Address"
+      }
+    },
+    "subnet2StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet 2 Starting IP Address"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "SSH Key for the virtual machines"
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "metadata": {
+        "description": "Authentication Type to chose for the Virtual Machines"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "defaultValue": "CSR",
+      "metadata": {
+        "description": "Name for the Virtual Machine."
+      }
+    },
+    "newStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique Name for Storage Account where the Virtual Machine's disks will be placed."
+      }
+    },
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS"
+      ],
+      "metadata": {
+        "description": "The type of storage account created."
+      }
+    },
+    "storageAccountNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Identifies whether to use new or existing Storage Account"
+      }
+    },
+    "storageAccountExistingRG": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource Group containing existing storage account"
+      }
+    },
+    "publicIPAddressName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Public IP Address"
+      }
+    },
+    "publicIPDnsName": {
+      "type": "string",
+      "defaultValue": "csrdns",
+      "metadata": {
+        "description": "Unique DNS Prefix for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "publicIPNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Indicates whether the Public IP is new or existing"
+      }
+    },
+    "publicIPExistingRGName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource Group containing existing public IP"
+      }
+    },
+    "baseUrl": {
+      "type": "string",
+      "metadata": {
+        "artifactsBaseUrl": "",
+        "description": "URL to acquire other templates"
+      },
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/cisco-csr-1000v"
+    }
+  },
     "variables": {
         "imagePublisher": "cisco",
         "imageOffer": "cisco-csr-1000v",
@@ -346,6 +352,34 @@
             }
           ]
         }
+      },{
+        "type": "Microsoft.Network/routeTables",
+        "name": "[concat(parameters('vmName'),'-CSR-Private-RouteTable')]",
+        "apiVersion": "[variables('apiVer')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+        ],
+        "properties": {
+          "routes": [
+            {
+              "name": "PublicSubnetRoute",
+              "properties": {
+                "addressPrefix": "[parameters('subnet1Prefix')]",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+              }
+            },
+            {
+              "name": "Default",
+              "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+              }
+            }
+          ]
+        }
       },
       {
         "apiVersion": "[variables('apiVer')]",
@@ -361,7 +395,8 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Dynamic",
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('subnet1StartAddress')]",
                 "subnet": {
                   "id": "[variables('subnet1Ref')]"
                 },
@@ -387,7 +422,7 @@
               "name": "ipconfig1",
               "properties": {
                 "privateIPAllocationMethod": "Static",
-                "privateIPAddress": "[parameters('subnet1StartAddress')]",
+                "privateIPAddress": "[parameters('subnet2StartAddress')]",
                 "subnet": {
                   "id": "[variables('subnet2Ref')]"
                 }
@@ -427,7 +462,7 @@
             "osDisk": {
               "name": "osdisk",
               "vhd": {
-                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/vhds/', 'osdisk', '.vhd')]"
+                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/vhds/', 'osdisk-',parameters('vmName'), '.vhd')]"
               },
               "caching": "ReadWrite",
               "createOption": "FromImage"

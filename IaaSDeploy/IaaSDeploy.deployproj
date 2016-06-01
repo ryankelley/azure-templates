@@ -41,6 +41,7 @@
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-prod.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql-integration.parameters.json" />
     <None Include="Templates\AzureSQL-Service\azuredeploy-azuresql.json" />
+    <None Include="Templates\cisco-csr-1000v\azuredeploy-azuredeploy-csr1000v-prod.parameters.json" />
     <None Include="Templates\cisco-csr-1000v\azuredeploy-csr1000v.json" />
     <None Include="Templates\cisco-csr-1000v\azuredeploy.parameters.allnew.json" />
     <None Include="Templates\cisco-csr-1000v\azuredeploy-azuredeploy-csr1000v-stage.parameters.json" />
@@ -54,6 +55,7 @@
     <None Include="Templates\DomainController\azuredeploy-domain-prod.parameters.json" />
     <None Include="Templates\DomainController\azuredeploy-domain.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front-integration.parameters.json" />
+    <None Include="Templates\FrontEnd-Servers\azuredeploy-front-prod-reg.parameters.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front-prod-doc.parameters.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front-prod.parameters.json" />
     <None Include="Templates\FrontEnd-Servers\azuredeploy-front.json" />
