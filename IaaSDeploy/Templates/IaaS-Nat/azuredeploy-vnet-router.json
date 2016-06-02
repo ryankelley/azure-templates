@@ -1,381 +1,387 @@
 ﻿{
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "vnetName": {
-      "type": "string",
-      "defaultValue": "TestVNet",
-      "metadata": {
-        "description": "Name for the new VNet."
-      }
-    },
-    "vnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.10.0.0/16",
-      "metadata": {
-        "description": "CIDR prefix for the VNet address space."
-      }
-    },
-    "dmzSubnetName": {
-      "type": "string",
-      "defaultValue": "DMZ",
-      "metadata": {
-        "description": "Name for the DMZ subnet."
-      }
-    },
-    "dmzSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.10.1.0/24",
-      "metadata": {
-        "description": "CIDR address prefix for the DMZ subnet."
-      }
-    },
-    "frontEndSubnetName": {
-      "type": "string",
-      "defaultValue": "Front",
-      "metadata": {
-        "description": "Name for the front end subnet."
-      }
-    },
-    "frontEndSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.10.5.0/24",
-      "metadata": {
-        "description": "CIDR address prefix for the front end subnet."
-      }
-    },
-    "backEndSubnetName": {
-      "type": "string",
-      "defaultValue": "Back",
-      "metadata": {
-        "description": "Name for the back end subnet."
-      }
-    },
-    "backEndSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.10.10.0/24",
-      "metadata": {
-        "description": "CIDR address prefix for the back end subnet."
-      }
-    },
-    "mgmtSubnetName": {
-      "type": "string",
-      "defaultValue": "Mgmt",
-      "metadata": {
-        "description": "Name for the back end subnet."
-      }
-    },
-    "mgmtSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.10.15.0/24",
-      "metadata": {
-        "description": "CIDR address prefix for the back end subnet."
-      }
-    },
-    "frontEndNSGName": {
-      "type": "string",
-      "defaultValue": "NSG-Front",
-      "metadata": {
-        "description": "Name for the NSG used to allow RDP, HTTP and HTPPS."
-      }
-    },
-    "backEndNSGName": {
-      "type": "string",
-      "defaultValue": "NSG-Back",
-      "metadata": {
-        "description": "Name for the NSG used to allow RDP, SQL, and block Internet."
-      }
-    },
-    "mgmtNSGName": {
-      "type": "string",
-      "defaultValue": "NSG-Mgmt",
-      "metadata": {
-        "description": "Name for the NSG used to allow RDP, SQL, and block Internet."
-      }
-    },
-    "vmaIpAddress": {
-      "type": "string",
-      "defaultValue": "192.168.0.4",
-      "metadata": {
-        "description": "IP address for virtual appliance."
-      }
-    },
-    "frontEndRouteTableName": {
-      "type": "string",
-      "defaultValue": "RT-FrontEnd",
-      "metadata": {
-        "description": "Name for front end subnet route table."
-      }
-    },
-    "backEndRouteTableName": {
-      "type": "string",
-      "defaultValue": "RT-BackEnd",
-      "metadata": {
-        "description": "Name for back end subnet route table."
-      }
-    }    ,
-    "mgmtRouteTableName": {
-      "type": "string",
-      "defaultValue": "RT-Mgmt",
-      "metadata": {
-        "description": "Name for back end subnet route table."
-      }
-    },
-    "allowedRDPIP": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {"description": "IP Address in CIDR format to allow RDP for firewall"}
-    }    
-  },
-  "variables": {
-  },
-  "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[parameters('backEndNSGName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "NSG - Back"
-      },
-      "properties": {
-        "securityRules": [
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[parameters('frontEndNSGName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "NSG - Front End"
-      },
-      "properties": {
-        "securityRules": [
-          {
-            "name": "rdp-rule",
-            "properties": {
-              "description": "Allow RDP",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "3389",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 100,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "http-rule",
-            "properties": {
-              "description": "Allow HTTP",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "80",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 101,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "https-rule",
-            "properties": {
-              "description": "Allow HTTPS",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "443",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 102,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "octo",
-            "properties": {
-              "description": "Allow Octopus Traffic",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "10933-10959",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 103,
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[parameters('mgmtNSGName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "NSG - Mgmt"
-      },
-      "properties": {
-        "securityRules": [
-          {
-            "name": "rdp-rule",
-            "properties": {
-              "description": "Allow RDP",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "3389",
-              "sourceAddressPrefix": "[parameters('allowedRDPIP')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 100,
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/routeTables",
-      "name": "[parameters('backEndRouteTableName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "Route Table - Back End"
-      },
-      "properties": {
-        "routes": [
-          {
-            "name": "RouteToFrontEnd",
-            "properties": {
-              "addressPrefix": "[parameters('frontEndSubnetPrefix')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/routeTables",
-      "name": "[parameters('frontEndRouteTableName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "Route Table - FrontEnd"
-      },
-      "properties": {
-        "routes": [
-          {
-            "name": "RouteToBackEnd",
-            "properties": {
-              "addressPrefix": "[parameters('backEndSubnetPrefix')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
-            }
-          }
-        ]
-      }
-    },
-     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/routeTables",
-      "name": "[parameters('mgmtRouteTableName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "Route Table - Mgmt"
-      },
-      "properties": {
-        "routes": [
-          {
-            "name": "RouteToBackEnd",
-            "properties": {
-              "addressPrefix": "[parameters('backEndSubnetPrefix')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[parameters('vmaIpAddress')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[parameters('vnetName')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('frontEndNSGName'))]",
-        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('backEndNSGName'))]",
-        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('mgmtNSGName'))]",
-        "[concat('Microsoft.Network/routeTables/', parameters('frontEndRouteTableName'))]",
-        "[concat('Microsoft.Network/routeTables/', parameters('backEndRouteTableName'))]",
-        "[concat('Microsoft.Network/routeTables/', parameters('mgmtRouteTableName'))]"
-      ],
-      "tags": {
-        "displayName": "VNet"
-      },
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[parameters('dmzSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('dmzSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[parameters('frontEndSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('frontEndSubnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('frontEndNSGName'))]"
-              },
-              "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('frontEndRouteTableName'))]"
-              }
-            }
-          },
-          {
-            "name": "[parameters('backEndSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('backEndSubnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('backEndNSGName'))]"
-              },
-              "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('backEndRouteTableName'))]"
-              }
-            }
-          },
-          {
-            "name": "[parameters('mgmtSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNSGName'))]"
-              },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', parameters('mgmtRouteTableName'))]"
-              }
-            }
-          },
-          {
-            "name": "GatewaySubnet",
-            "properties": {
-              "addressPrefix": "10.10.0.0/24"
-            }
-          }
+	"$schema" : "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion" : "1.0.0.0",
+	"parameters" : {
+		"vnetName" : {
+			"type" : "string",
+			"defaultValue" : "TestVNet",
+			"metadata" : {
+				"description" : "Name for the new VNet."
+			}
+		},
+		"vnetPrefix" : {
+			"type" : "string",
+			"defaultValue" : "10.10.0.0/16",
+			"metadata" : {
+				"description" : "CIDR prefix for the VNet address space."
+			}
+		},
+		"dmzSubnetName" : {
+			"type" : "string",
+			"defaultValue" : "DMZ",
+			"metadata" : {
+				"description" : "Name for the DMZ subnet."
+			}
+		},
+		"dmzSubnetPrefix" : {
+			"type" : "string",
+			"defaultValue" : "10.10.1.0/24",
+			"metadata" : {
+				"description" : "CIDR address prefix for the DMZ subnet."
+			}
+		},
+		"frontEndSubnetName" : {
+			"type" : "string",
+			"defaultValue" : "Front",
+			"metadata" : {
+				"description" : "Name for the front end subnet."
+			}
+		},
+		"frontEndSubnetPrefix" : {
+			"type" : "string",
+			"defaultValue" : "10.10.5.0/24",
+			"metadata" : {
+				"description" : "CIDR address prefix for the front end subnet."
+			}
+		},
+		"backEndSubnetName" : {
+			"type" : "string",
+			"defaultValue" : "Back",
+			"metadata" : {
+				"description" : "Name for the back end subnet."
+			}
+		},
+		"backEndSubnetPrefix" : {
+			"type" : "string",
+			"defaultValue" : "10.10.10.0/24",
+			"metadata" : {
+				"description" : "CIDR address prefix for the back end subnet."
+			}
+		},
+		"mgmtSubnetName" : {
+			"type" : "string",
+			"defaultValue" : "Mgmt",
+			"metadata" : {
+				"description" : "Name for the back end subnet."
+			}
+		},
+		"mgmtSubnetPrefix" : {
+			"type" : "string",
+			"defaultValue" : "10.10.15.0/24",
+			"metadata" : {
+				"description" : "CIDR address prefix for the back end subnet."
+			}
+		},
+		"frontEndNSGName" : {
+			"type" : "string",
+			"defaultValue" : "NSG-Front",
+			"metadata" : {
+				"description" : "Name for the NSG used to allow RDP, HTTP and HTPPS."
+			}
+		},
+		"backEndNSGName" : {
+			"type" : "string",
+			"defaultValue" : "NSG-Back",
+			"metadata" : {
+				"description" : "Name for the NSG used to allow RDP, SQL, and block Internet."
+			}
+		},
+		"mgmtNSGName" : {
+			"type" : "string",
+			"defaultValue" : "NSG-Mgmt",
+			"metadata" : {
+				"description" : "Name for the NSG used to allow RDP, SQL, and block Internet."
+			}
+		},
+		"vmaIpAddress" : {
+			"type" : "string",
+			"defaultValue" : "192.168.0.4",
+			"metadata" : {
+				"description" : "IP address for virtual appliance."
+			}
+		},
+		"frontEndRouteTableName" : {
+			"type" : "string",
+			"defaultValue" : "RT-FrontEnd",
+			"metadata" : {
+				"description" : "Name for front end subnet route table."
+			}
+		},
+		"backEndRouteTableName" : {
+			"type" : "string",
+			"defaultValue" : "RT-BackEnd",
+			"metadata" : {
+				"description" : "Name for back end subnet route table."
+			}
+		},
+		"mgmtRouteTableName" : {
+			"type" : "string",
+			"defaultValue" : "RT-Mgmt",
+			"metadata" : {
+				"description" : "Name for back end subnet route table."
+			}
+		},
+		"allowedRDPIP" : {
+			"type" : "string",
+			"defaultValue" : "",
+			"metadata" : {
+				"description" : "IP Address in CIDR format to allow RDP for firewall"
+			}
+		}
+	},
+	"variables" : {},
+	"resources" : [{
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/networkSecurityGroups",
+			"name" : "[parameters('backEndNSGName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "NSG - Back"
+			},
+			"properties" : {
+				"securityRules" : [
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/networkSecurityGroups",
+			"name" : "[parameters('frontEndNSGName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "NSG - Front End"
+			},
+			"properties" : {
+				"securityRules" : [{
+						"name" : "rdp-rule",
+						"properties" : {
+							"description" : "Allow RDP",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "3389",
+							"sourceAddressPrefix" : "Internet",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 100,
+							"direction" : "Inbound"
+						}
+					}, {
+						"name" : "http-rule",
+						"properties" : {
+							"description" : "Allow HTTP",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "80",
+							"sourceAddressPrefix" : "Internet",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 101,
+							"direction" : "Inbound"
+						}
+					}, {
+						"name" : "https-rule",
+						"properties" : {
+							"description" : "Allow HTTPS",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "443",
+							"sourceAddressPrefix" : "Internet",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 102,
+							"direction" : "Inbound"
+						}
+					}, {
+						"name" : "octo",
+						"properties" : {
+							"description" : "Allow Octopus Traffic",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "10933-10959",
+							"sourceAddressPrefix" : "*",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 103,
+							"direction" : "Inbound"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/networkSecurityGroups",
+			"name" : "[parameters('mgmtNSGName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "NSG - Mgmt"
+			},
+			"properties" : {
+				"securityRules" : [{
+						"name" : "rdp-rule",
+						"properties" : {
+							"description" : "Allow RDP",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "3389",
+							"sourceAddressPrefix" : "[parameters('allowedRDPIP')]",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 100,
+							"direction" : "Inbound"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/networkSecurityGroups",
+			"name" : "NSG-DMZ",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "NSG - DMZ"
+			},
+			"properties" : {
+				"securityRules" : [{
+						"name" : "ssh-rule",
+						"properties" : {
+							"description" : "Allow ssh",
+							"protocol" : "Tcp",
+							"sourcePortRange" : "*",
+							"destinationPortRange" : "22",
+							"sourceAddressPrefix" : "[parameters('allowedRDPIP')]",
+							"destinationAddressPrefix" : "*",
+							"access" : "Allow",
+							"priority" : 100,
+							"direction" : "Inbound"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/routeTables",
+			"name" : "[parameters('backEndRouteTableName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "Route Table - Back End"
+			},
+			"properties" : {
+				"routes" : [{
+						"name" : "RouteToFrontEnd",
+						"properties" : {
+							"addressPrefix" : "[parameters('frontEndSubnetPrefix')]",
+							"nextHopType" : "VirtualAppliance",
+							"nextHopIpAddress" : "[parameters('vmaIpAddress')]"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/routeTables",
+			"name" : "[parameters('frontEndRouteTableName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "Route Table - FrontEnd"
+			},
+			"properties" : {
+				"routes" : [{
+						"name" : "RouteToBackEnd",
+						"properties" : {
+							"addressPrefix" : "[parameters('backEndSubnetPrefix')]",
+							"nextHopType" : "VirtualAppliance",
+							"nextHopIpAddress" : "[parameters('vmaIpAddress')]"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/routeTables",
+			"name" : "[parameters('mgmtRouteTableName')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "Route Table - Mgmt"
+			},
+			"properties" : {
+				"routes" : [{
+						"name" : "RouteToBackEnd",
+						"properties" : {
+							"addressPrefix" : "[parameters('backEndSubnetPrefix')]",
+							"nextHopType" : "VirtualAppliance",
+							"nextHopIpAddress" : "[parameters('vmaIpAddress')]"
+						}
+					}
+				]
+			}
+		}, {
+			"apiVersion" : "2015-06-15",
+			"type" : "Microsoft.Network/virtualNetworks",
+			"name" : "[parameters('vnetName')]",
+			"location" : "[resourceGroup().location]",
+			"dependsOn" : [
+				"[concat('Microsoft.Network/networkSecurityGroups/', parameters('frontEndNSGName'))]",
+				"[concat('Microsoft.Network/networkSecurityGroups/', parameters('backEndNSGName'))]",
+				"[concat('Microsoft.Network/networkSecurityGroups/', parameters('mgmtNSGName'))]",
+				"[concat('Microsoft.Network/routeTables/', parameters('frontEndRouteTableName'))]",
+				"[concat('Microsoft.Network/routeTables/', parameters('backEndRouteTableName'))]",
+				"[concat('Microsoft.Network/routeTables/', parameters('mgmtRouteTableName'))]"
+			],
+			"tags" : {
+				"displayName" : "VNet"
+			},
+			"properties" : {
+				"addressSpace" : {
+					"addressPrefixes" : [
+						"[parameters('vnetPrefix')]"
+					]
+				},
+				"subnets" : [{
+						"name" : "[parameters('dmzSubnetName')]",
+						"properties" : {
+							"addressPrefix" : "[parameters('dmzSubnetPrefix')]"
+						}
+					}, {
+						"name" : "[parameters('frontEndSubnetName')]",
+						"properties" : {
+							"addressPrefix" : "[parameters('frontEndSubnetPrefix')]",
+							"networkSecurityGroup" : {
+								"id" : "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('frontEndNSGName'))]"
+							},
+							"routeTable" : {
+								"id" : "[resourceId('Microsoft.Network/routeTables', parameters('frontEndRouteTableName'))]"
+							}
+						}
+					}, {
+						"name" : "[parameters('backEndSubnetName')]",
+						"properties" : {
+							"addressPrefix" : "[parameters('backEndSubnetPrefix')]",
+							"networkSecurityGroup" : {
+								"id" : "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('backEndNSGName'))]"
+							},
+							"routeTable" : {
+								"id" : "[resourceId('Microsoft.Network/routeTables', parameters('backEndRouteTableName'))]"
+							}
+						}
+					}, {
+						"name" : "[parameters('mgmtSubnetName')]",
+						"properties" : {
+							"addressPrefix" : "[parameters('mgmtSubnetPrefix')]",
+							"networkSecurityGroup" : {
+								"id" : "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNSGName'))]"
+							},
+							"routeTable" : {
+								"id" : "[resourceId('Microsoft.Network/routeTables', parameters('mgmtRouteTableName'))]"
+							}
+						}
+					}, {
+						"name" : "GatewaySubnet",
+						"properties" : {
+							"addressPrefix" : "10.10.0.0/24"
+						}
+					}
 
-        ]
-      }
-    }
-  ]
-  }
+				]
+			}
+		}
+	]
+}

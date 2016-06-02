@@ -2,13 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "fwCount": {
-      "type": "int",
-      "defaultValue": 1,
-      "metadata": {
-        "description": "Number of FW VMs to be deployed to the DMZ subnet."
-      }
-    },
     "vnetName": {
       "type": "string",
       "defaultValue": "TestVNet",
@@ -167,23 +160,6 @@
     }
   },
   "variables": {
-    "fwVMSettings": {
-      "vmSize": "Standard_D1",
-      "adminUsername": "ubuntu",
-      "adminPassword": "adminP@ssw0rd",
-      "publisher": "Canonical",
-      "offer": "UbuntuServer",
-      "sku": "14.04.2-LTS",
-      "version": "latest",
-      "vmName": "FW",
-      "osdisk": "osdiskfw",
-      "nicName": "NICFW",
-      "nicNameInternal": "NICFWINT",
-      "nicNameNat": "NATFW",
-      "pipName": "PIPFW",
-      "pipNameNat": "PIPFNAT",
-      "avsetName": "ASFW"
-    },
     "location": "[resourceGroup().location]",
     "vmStorageAccountContainerName": "vhds",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
@@ -238,123 +214,6 @@
           "frontEndRouteTableName": { "value": "[parameters('frontEndRouteTableName')]" },
           "backEndRouteTableName": { "value": "[parameters('backEndRouteTableName')]" },
           "allowedRDPIP": {"value": "[parameters('allowedRDPIP')]"}
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[variables('location')]",
-      "name": "[concat(variables('fwVMSettings').pipName, copyindex(1))]",
-      "properties": {
-        "publicIPAllocationMethod": "dynamic"
-      },
-      "tags": {
-        "displayName": "PublicIPAddresses - DMZ"
-      },
-      "copy": {
-        "name": "webpipcount",
-        "count": "[parameters('fwCount')]"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[variables('location')]",
-      "tags": {
-        "displayName": "NetworkInterfaces - DMZ"
-      },
-      "name": "[concat(variables('fwVMSettings').nicName, copyindex(1))]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('fwVMSettings').pipName, copyindex(1))]",
-        "[concat('Microsoft.Resources/deployments/', 'vnetTemplate')]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat('10.10.1.',copyindex(4))]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('fwVMSettings').pipName, copyindex(1)))]"
-              },
-              "subnet": {
-                "id": "[variables('dmzSubnetRef')]"
-              }
-            }
-          }
-        ],
-        "enableIPForwarding": true
-      },
-      "copy": {
-        "name": "fwCount",
-        "count": "[parameters('fwCount')]"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('fwVMSettings').avsetName]",
-      "location": "[variables('location')]",
-      "dependsOn": [ ],
-      "tags": {
-        "displayName": "AvailabilitySet - FW"
-      }
-    },
-
-    {
-      "apiVersion": "2015-06-15",
-      "name": "[concat(variables('fwVMSettings').vmName,copyindex(1))]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "fwvmcount",
-        "count": "[parameters('fwCount')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fwVMSettings').nicName, copyindex(1))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('fwVMSettings').avsetName)]",
-        "[concat('Microsoft.Resources/deployments/', 'storageTemplate')]"
-      ],
-      "tags": {
-        "displayName": "VMs - DMZ"
-      },
-      "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('fwVMSettings').avsetName)]"
-        },
-        "hardwareProfile": {
-          "vmSize": "[variables('fwVMSettings').vmSize]"
-        },
-        "osProfile": {
-          "computerName": "[concat(variables('fwVMSettings').vmName,copyindex(1))]",
-          "adminUsername": "[variables('fwVMSettings').adminUsername]",
-          "adminPassword": "[variables('fwVMSettings').adminPassword]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('fwVMSettings').publisher]",
-            "offer": "[variables('fwVMSettings').offer]",
-            "sku": "[variables('fwVMSettings').sku]",
-            "version": "[variables('fwVMSettings').version]"
-          },
-          "osDisk": {
-            "name": "[concat(variables('fwVMSettings').osdisk,copyindex(1))]",
-            "vhd": {
-              "uri": "[concat('http://', parameters('stdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('fwVMSettings').osdisk, copyindex(1),'.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('fwVMSettings').nicName,copyindex(1)))]",
-              "properties": { "primary": true }
-            }
-          ]
         }
       }
     }
